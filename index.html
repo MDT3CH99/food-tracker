@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>รายรับรายจ่าย ร้านขายอาหาร</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF6EC;
+    --paper-line:#E4DCC6;
+    --ink:#233D2F;
+    --ink-soft:#5C6E62;
+    --gold:#B5811E;
+    --gold-bg:#F3E6C8;
+    --brick:#A6452F;
+    --brick-bg:#F3DFD8;
+    --card:#FFFFFF;
+    --shadow:0 1px 0 rgba(35,61,47,0.08);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;}
+  .wrap{
+    font-family:'Sarabun',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    padding:16px 14px 28px;
+    max-width:480px;
+    margin:0 auto;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1{
+    font-size:19px;
+    font-weight:700;
+    margin:0 0 4px;
+    letter-spacing:0.2px;
+  }
+  .sub{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin:0 0 16px;
+  }
+  .summary{
+    background:var(--ink);
+    color:var(--paper);
+    border-radius:14px;
+    padding:18px 18px 16px;
+    margin-bottom:16px;
+  }
+  .summary .net-label{
+    font-size:12px;
+    color:#B9C8BE;
+    margin:0 0 2px;
+  }
+  .summary .net-value{
+    font-size:32px;
+    font-weight:700;
+    margin:0 0 14px;
+    line-height:1.1;
+  }
+  .summary .row{
+    display:flex;
+    gap:10px;
+  }
+  .summary .pill{
+    flex:1;
+    background:rgba(255,255,255,0.08);
+    border-radius:10px;
+    padding:8px 10px;
+  }
+  .summary .pill-label{
+    font-size:11px;
+    color:#B9C8BE;
+    margin:0 0 2px;
+  }
+  .summary .pill-value{
+    font-size:15px;
+    font-weight:600;
+    margin:0;
+  }
+  .summary .pill-value.income{color:#E6C97A;}
+  .summary .pill-value.expense{color:#E8A491;}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--paper-line);
+    border-radius:14px;
+    padding:14px;
+    margin-bottom:14px;
+  }
+  .card-title{
+    font-size:14px;
+    font-weight:600;
+    margin:0 0 10px;
+    color:var(--ink);
+  }
+  .type-toggle{
+    display:flex;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .type-btn{
+    flex:1;
+    border:1px solid var(--paper-line);
+    background:var(--paper);
+    border-radius:10px;
+    padding:9px 0;
+    font-family:'Sarabun',sans-serif;
+    font-size:14px;
+    font-weight:600;
+    color:var(--ink-soft);
+  }
+  .type-btn.active-income{
+    background:var(--gold-bg);
+    border-color:var(--gold);
+    color:var(--gold);
+  }
+  .type-btn.active-expense{
+    background:var(--brick-bg);
+    border-color:var(--brick);
+    color:var(--brick);
+  }
+  .field{margin-bottom:10px;}
+  .field label{
+    display:block;
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:4px;
+  }
+  .field input, .field select{
+    width:100%;
+    font-family:'Sarabun',sans-serif;
+    font-size:15px;
+    padding:9px 10px;
+    border:1px solid var(--paper-line);
+    border-radius:9px;
+    background:#FFFEFB;
+    color:var(--ink);
+  }
+  .field input:focus, .field select:focus{
+    outline:2px solid var(--ink);
+    outline-offset:0;
+  }
+  .row2{display:flex; gap:10px;}
+  .row2 .field{flex:1;}
+  .add-btn{
+    width:100%;
+    border:none;
+    border-radius:10px;
+    padding:12px 0;
+    font-family:'Sarabun',sans-serif;
+    font-size:15px;
+    font-weight:700;
+    background:var(--ink);
+    color:var(--paper);
+    margin-top:2px;
+  }
+  .add-btn:active{opacity:0.85;}
+  .error-msg{
+    font-size:12px;
+    color:var(--brick);
+    margin:-4px 0 8px;
+    display:none;
+  }
+  .list-title{
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink-soft);
+    margin:0 0 8px;
+    padding:0 2px;
+  }
+  .entry{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--card);
+    border:1px solid var(--paper-line);
+    border-radius:12px;
+    padding:11px 12px;
+    margin-bottom:8px;
+  }
+  .entry-left{min-width:0;}
+  .entry-item{
+    font-size:14px;
+    font-weight:600;
+    margin:0 0 2px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .entry-meta{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin:0;
+  }
+  .entry-right{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-shrink:0;
+    padding-left:8px;
+  }
+  .entry-amount{
+    font-size:15px;
+    font-weight:700;
+    white-space:nowrap;
+  }
+  .entry-amount.income{color:var(--gold);}
+  .entry-amount.expense{color:var(--brick);}
+  .del-btn{
+    border:none;
+    background:transparent;
+    color:var(--ink-soft);
+    font-size:18px;
+    line-height:1;
+    padding:4px 2px;
+  }
+  .empty{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:13px;
+    padding:20px 0;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;">รายรับรายจ่ายร้านขายอาหาร คำนวณอัตโนมัติ</h1>
+  <h1>บันทึกรายรับ-รายจ่าย</h1>
+  <p class="sub">ร้านขายอาหาร &middot; คำนวณยอดให้อัตโนมัติทุกครั้งที่บันทึก</p>
+
+  <div class="summary">
+    <p class="net-label">คงเหลือสุทธิ</p>
+    <p class="net-value" id="netValue">0 บาท</p>
+    <div class="row">
+      <div class="pill">
+        <p class="pill-label">รายรับรวม</p>
+        <p class="pill-value income" id="totalIncome">0</p>
+      </div>
+      <div class="pill">
+        <p class="pill-label">รายจ่ายรวม</p>
+        <p class="pill-value expense" id="totalExpense">0</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="card-title">เพิ่มรายการ</p>
+    <div class="type-toggle">
+      <button type="button" class="type-btn" id="btnIncome">รายรับ</button>
+      <button type="button" class="type-btn" id="btnExpense">รายจ่าย</button>
+    </div>
+    <div class="field">
+      <label for="itemInput">รายการ</label>
+      <input type="text" id="itemInput" placeholder="เช่น ขายอาหาร, หมู, ค่าน้ำมัน">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="categoryInput">หมวดหมู่</label>
+        <select id="categoryInput">
+          <option value="รายได้จากการขาย">รายได้จากการขาย</option>
+          <option value="เงินกู้ยืม">เงินกู้ยืม</option>
+          <option value="วัตถุดิบ">วัตถุดิบ</option>
+          <option value="ค่าใช้จ่ายอื่นๆ">ค่าใช้จ่ายอื่นๆ</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="amountInput">จำนวนเงิน (บาท)</label>
+        <input type="number" id="amountInput" placeholder="0" inputmode="decimal" min="0" step="0.01">
+      </div>
+    </div>
+    <p class="error-msg" id="errorMsg">กรอกรายการและจำนวนเงินให้ครบก่อนบันทึก</p>
+    <button class="add-btn" id="addBtn">บันทึกรายการ</button>
+  </div>
+
+  <p class="list-title">รายการทั้งหมด</p>
+  <div id="entryList"></div>
+</div>
+
+<script>
+let entries = [];
+let currentType = 'income';
+
+const seedEntries = [
+  {id: 1, date: '7 ก.ย. 2569', item: 'ยืมเงิน', category: 'เงินกู้ยืม', type: 'income', amount: 5000},
+  {id: 2, date: '7 ก.ย. 2569', item: 'หมู', category: 'วัตถุดิบ', type: 'expense', amount: 580},
+  {id: 3, date: '7 ก.ย. 2569', item: 'หมู', category: 'วัตถุดิบ', type: 'expense', amount: 542},
+  {id: 4, date: '7 ก.ย. 2569', item: 'ไข่', category: 'วัตถุดิบ', type: 'expense', amount: 165},
+  {id: 5, date: '7 ก.ย. 2569', item: 'กุนเชียง', category: 'วัตถุดิบ', type: 'expense', amount: 140},
+  {id: 6, date: '7 ก.ย. 2569', item: 'น้ำมัน', category: 'วัตถุดิบ', type: 'expense', amount: 280},
+  {id: 7, date: '7 ก.ย. 2569', item: 'น้ำผึ้ง', category: 'วัตถุดิบ', type: 'expense', amount: 152},
+  {id: 8, date: '7 ก.ย. 2569', item: 'เครื่องปรุง', category: 'วัตถุดิบ', type: 'expense', amount: 150}
+];
+
+function formatBaht(n){
+  return Math.round(n).toLocaleString('th-TH');
+}
+
+function setType(type){
+  currentType = type;
+  document.getElementById('btnIncome').className = 'type-btn' + (type === 'income' ? ' active-income' : '');
+  document.getElementById('btnExpense').className = 'type-btn' + (type === 'expense' ? ' active-expense' : '');
+  const cat = document.getElementById('categoryInput');
+  cat.innerHTML = '';
+  const opts = type === 'income'
+    ? ['รายได้จากการขาย', 'เงินกู้ยืม', 'รายรับอื่นๆ']
+    : ['วัตถุดิบ', 'ค่าเช่า', 'ค่าน้ำ-ไฟ', 'ค่าใช้จ่ายอื่นๆ'];
+  opts.forEach(o => {
+    const el = document.createElement('option');
+    el.value = o;
+    el.textContent = o;
+    cat.appendChild(el);
+  });
+}
+
+function todayLabel(){
+  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const d = new Date();
+  return d.getDate() + ' ' + months[d.getMonth()] + ' ' + (d.getFullYear() + 543);
+}
+
+function render(){
+  let income = 0, expense = 0;
+  entries.forEach(e => {
+    if(e.type === 'income') income += Number(e.amount);
+    else expense += Number(e.amount);
+  });
+  document.getElementById('totalIncome').textContent = formatBaht(income) + ' บาท';
+  document.getElementById('totalExpense').textContent = formatBaht(expense) + ' บาท';
+  document.getElementById('netValue').textContent = formatBaht(income - expense) + ' บาท';
+
+  const list = document.getElementById('entryList');
+  list.innerHTML = '';
+  if(entries.length === 0){
+    list.innerHTML = '<div class="empty">ยังไม่มีรายการ เริ่มบันทึกได้เลย</div>';
+    return;
+  }
+  entries.slice().reverse().forEach(e => {
+    const row = document.createElement('div');
+    row.className = 'entry';
+    row.innerHTML = `
+      <div class="entry-left">
+        <p class="entry-item">${escapeHtml(e.item)}</p>
+        <p class="entry-meta">${escapeHtml(e.category)} &middot; ${escapeHtml(e.date)}</p>
+      </div>
+      <div class="entry-right">
+        <span class="entry-amount ${e.type}">${e.type === 'expense' ? '-' : '+'}${formatBaht(e.amount)}</span>
+        <button class="del-btn" data-id="${e.id}" aria-label="ลบรายการ">&#10005;</button>
+      </div>
+    `;
+    list.appendChild(row);
+  });
+  list.querySelectorAll('.del-btn').forEach(btn => {
+    btn.addEventListener('click', () => deleteEntry(Number(btn.getAttribute('data-id'))));
+  });
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function saveEntries(){
+  try{
+    localStorage.setItem('food-tracker-entries', JSON.stringify(entries));
+  }catch(err){
+    console.error('Storage save failed:', err);
+  }
+}
+
+function loadEntries(){
+  try{
+    const stored = localStorage.getItem('food-tracker-entries');
+    if(stored){
+      entries = JSON.parse(stored);
+    } else {
+      entries = seedEntries;
+      saveEntries();
+    }
+  }catch(err){
+    entries = seedEntries;
+  }
+  render();
+}
+
+function deleteEntry(id){
+  entries = entries.filter(e => e.id !== id);
+  saveEntries();
+  render();
+}
+
+function addEntry(){
+  const itemInput = document.getElementById('itemInput');
+  const amountInput = document.getElementById('amountInput');
+  const categoryInput = document.getElementById('categoryInput');
+  const errorMsg = document.getElementById('errorMsg');
+
+  const item = itemInput.value.trim();
+  const amount = parseFloat(amountInput.value);
+
+  if(!item || isNaN(amount) || amount <= 0){
+    errorMsg.style.display = 'block';
+    return;
+  }
+  errorMsg.style.display = 'none';
+
+  const newEntry = {
+    id: Date.now(),
+    date: todayLabel(),
+    item: item,
+    category: categoryInput.value,
+    type: currentType,
+    amount: amount
+  };
+  entries.push(newEntry);
+  saveEntries();
+  render();
+
+  itemInput.value = '';
+  amountInput.value = '';
+  itemInput.focus();
+}
+
+document.getElementById('btnIncome').addEventListener('click', () => setType('income'));
+document.getElementById('btnExpense').addEventListener('click', () => setType('expense'));
+document.getElementById('addBtn').addEventListener('click', addEntry);
+document.getElementById('itemInput').addEventListener('input', () => {
+  document.getElementById('errorMsg').style.display = 'none';
+});
+document.getElementById('amountInput').addEventListener('input', () => {
+  document.getElementById('errorMsg').style.display = 'none';
+});
+
+setType('income');
+loadEntries();
+</script>
+</body>
+</html>
