@@ -272,6 +272,7 @@
       </div>
     </div>
     <p class="error-msg" id="errorMsg">กรอกรายการและจำนวนเงินให้ครบก่อนบันทึก</p>
+    <p class="error-msg" id="storageMsg" role="status"></p>
     <button class="add-btn" id="addBtn">บันทึกรายการ</button>
   </div>
 
@@ -282,6 +283,7 @@
 <script>
 let entries = [];
 let currentType = 'income';
+const STORAGE_KEY = 'food-tracker.entries.v1';
 
 const seedEntries = [
   {id: 1, date: '7 ก.ย. 2569', item: 'ยืมเงิน', category: 'เงินกู้ยืม', type: 'income', amount: 5000},
@@ -295,7 +297,36 @@ const seedEntries = [
 ];
 
 function formatBaht(n){
-  return Math.round(n).toLocaleString('th-TH');
+  const value = Number(n);
+  return (Number.isFinite(value) ? value : 0).toLocaleString('th-TH', {
+    minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
+    maximumFractionDigits: 2
+  });
+}
+
+function storageMessage(message = ''){
+  const el = document.getElementById('storageMsg');
+  el.textContent = message;
+  el.style.display = message ? 'block' : 'none';
+}
+
+function validEntries(value){
+  if(!Array.isArray(value)) return null;
+  return value.filter(e =>
+    e &&
+    (e.type === 'income' || e.type === 'expense') &&
+    typeof e.item === 'string' &&
+    typeof e.category === 'string' &&
+    typeof e.date === 'string' &&
+    Number.isFinite(Number(e.amount)) && Number(e.amount) > 0
+  ).map(e => ({
+    id: String(e.id || `${Date.now()}-${Math.random()}`),
+    date: e.date,
+    item: e.item,
+    category: e.category,
+    type: e.type,
+    amount: Number(e.amount)
+  }));
 }
 
 function setType(type){
@@ -347,13 +378,13 @@ function render(){
       </div>
       <div class="entry-right">
         <span class="entry-amount ${e.type}">${e.type === 'expense' ? '-' : '+'}${formatBaht(e.amount)}</span>
-        <button class="del-btn" data-id="${e.id}" aria-label="ลบรายการ">&#10005;</button>
+        <button class="del-btn" data-id="${escapeHtml(e.id)}" aria-label="ลบรายการ">&#10005;</button>
       </div>
     `;
     list.appendChild(row);
   });
   list.querySelectorAll('.del-btn').forEach(btn => {
-    btn.addEventListener('click', () => deleteEntry(Number(btn.getAttribute('data-id'))));
+    btn.addEventListener('click', () => deleteEntry(btn.getAttribute('data-id')));
   });
 }
 
@@ -365,29 +396,37 @@ function escapeHtml(str){
 
 function saveEntries(){
   try{
-    localStorage.setItem('food-tracker-entries', JSON.stringify(entries));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    storageMessage();
+    return true;
   }catch(err){
     console.error('Storage save failed:', err);
+    storageMessage('บันทึกในอุปกรณ์ไม่ได้ โปรดตรวจสอบพื้นที่จัดเก็บของเบราว์เซอร์');
+    return false;
   }
 }
 
 function loadEntries(){
   try{
-    const stored = localStorage.getItem('food-tracker-entries');
-    if(stored){
-      entries = JSON.parse(stored);
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if(saved !== null){
+      const parsed = validEntries(JSON.parse(saved));
+      if(parsed === null) throw new Error('Invalid saved entries');
+      entries = parsed;
     } else {
-      entries = seedEntries;
+      entries = seedEntries.map(e => ({...e, id: String(e.id)}));
       saveEntries();
     }
   }catch(err){
-    entries = seedEntries;
+    console.error('Storage load failed:', err);
+    entries = seedEntries.map(e => ({...e, id: String(e.id)}));
+    storageMessage('ไม่สามารถอ่านข้อมูลเดิมได้ จึงแสดงข้อมูลตัวอย่างชั่วคราว');
   }
   render();
 }
 
 function deleteEntry(id){
-  entries = entries.filter(e => e.id !== id);
+  entries = entries.filter(e => e.id !== String(id));
   saveEntries();
   render();
 }
@@ -408,7 +447,7 @@ function addEntry(){
   errorMsg.style.display = 'none';
 
   const newEntry = {
-    id: Date.now(),
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     date: todayLabel(),
     item: item,
     category: categoryInput.value,
@@ -432,6 +471,9 @@ document.getElementById('itemInput').addEventListener('input', () => {
 });
 document.getElementById('amountInput').addEventListener('input', () => {
   document.getElementById('errorMsg').style.display = 'none';
+});
+window.addEventListener('storage', event => {
+  if(event.key === STORAGE_KEY) loadEntries();
 });
 
 setType('income');
