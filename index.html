@@ -6,105 +6,216 @@
 <title>รายรับรายจ่าย ร้านขายอาหาร</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#FAF6EC;
-    --paper-line:#E4DCC6;
-    --ink:#233D2F;
-    --ink-soft:#5C6E62;
-    --gold:#B5811E;
-    --gold-bg:#F3E6C8;
-    --brick:#A6452F;
-    --brick-bg:#F3DFD8;
-    --card:#FFFFFF;
-    --shadow:0 1px 0 rgba(35,61,47,0.08);
+    --bg:#080B10;
+    --bg-grid:rgba(90,240,190,0.035);
+    --panel:#0E141B;
+    --panel-2:#121A22;
+    --line:#1D2933;
+    --line-soft:#161F27;
+    --ink:#E7EFEC;
+    --ink-soft:#7C8B92;
+    --ink-faint:#4C5A61;
+    --mint:#3DE8A0;
+    --mint-dim:rgba(61,232,160,0.14);
+    --coral:#FF6B6B;
+    --coral-dim:rgba(255,107,107,0.14);
+    --amber:#F5C452;
   }
   *{box-sizing:border-box;}
   body{margin:0;}
   .wrap{
     font-family:'Sarabun',sans-serif;
-    background:var(--paper);
+    background:
+      radial-gradient(circle at 15% 0%, rgba(61,232,160,0.06), transparent 45%),
+      radial-gradient(circle at 85% 100%, rgba(255,107,107,0.05), transparent 40%),
+      var(--bg);
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(61,232,160,0.06), transparent 45%),
+      radial-gradient(circle at 85% 100%, rgba(255,107,107,0.05), transparent 40%),
+      linear-gradient(var(--bg-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px),
+      var(--bg);
+    background-size:auto,auto,26px 26px,26px 26px,auto;
     color:var(--ink);
-    padding:16px 14px 28px;
+    padding:16px 14px 32px;
     max-width:480px;
     margin:0 auto;
+    min-height:100%;
     -webkit-font-smoothing:antialiased;
   }
-  h1{
-    font-size:19px;
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .topbar-text h1{
+    font-size:18px;
     font-weight:700;
-    margin:0 0 4px;
+    margin:0 0 2px;
     letter-spacing:0.2px;
   }
-  .sub{
-    font-size:13px;
+  .topbar-text .sub{
+    font-size:11px;
+    color:var(--ink-faint);
+    margin:0;
+    letter-spacing:1px;
+    text-transform:uppercase;
+  }
+  .icon-btn{
+    width:38px;
+    height:38px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--panel-2);
     color:var(--ink-soft);
-    margin:0 0 16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
   }
-  .summary{
-    background:var(--ink);
-    color:var(--paper);
+  .icon-btn svg{width:18px;height:18px;}
+  .icon-btn.active{
+    border-color:rgba(61,232,160,0.5);
+    color:var(--mint);
+    box-shadow:0 0 0 1px rgba(61,232,160,0.15), 0 0 14px rgba(61,232,160,0.18);
+  }
+
+  .settings-panel{
+    display:none;
+    background:var(--panel);
+    border:1px solid var(--line);
     border-radius:14px;
-    padding:18px 18px 16px;
-    margin-bottom:16px;
+    padding:14px;
+    margin-bottom:14px;
   }
-  .summary .net-label{
+  .settings-panel.open{display:block;}
+  .settings-panel .st-title{
     font-size:12px;
-    color:#B9C8BE;
-    margin:0 0 2px;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    letter-spacing:1px;
+    margin:0 0 10px;
   }
-  .summary .net-value{
-    font-size:32px;
+  .settings-row{display:flex; gap:8px;}
+  .settings-row input{
+    flex:1;
+    font-family:'JetBrains Mono',monospace;
+    font-size:15px;
+    padding:9px 10px;
+    border:1px solid var(--line);
+    border-radius:9px;
+    background:var(--panel-2);
+    color:var(--ink);
+  }
+  .settings-row button{
+    border:1px solid rgba(61,232,160,0.4);
+    background:var(--mint-dim);
+    color:var(--mint);
+    border-radius:9px;
+    padding:0 16px;
+    font-family:'Sarabun',sans-serif;
+    font-weight:600;
+    font-size:14px;
+  }
+
+  .dash{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:18px;
+    margin-bottom:14px;
+    position:relative;
+    overflow:hidden;
+  }
+  .dash::before{
+    content:'';
+    position:absolute;
+    top:-40%; right:-20%;
+    width:220px; height:220px;
+    background:radial-gradient(circle, rgba(61,232,160,0.10), transparent 70%);
+    pointer-events:none;
+  }
+  .net-label{
+    font-size:11px;
+    color:var(--ink-faint);
+    text-transform:uppercase;
+    letter-spacing:1.5px;
+    margin:0 0 4px;
+  }
+  .net-value{
+    font-size:30px;
     font-weight:700;
-    margin:0 0 14px;
+    margin:0 0 16px;
     line-height:1.1;
   }
-  .summary .row{
-    display:flex;
-    gap:10px;
-  }
-  .summary .pill{
+  .pill-row{display:flex; gap:10px; margin-bottom:16px;}
+  .pill{
     flex:1;
-    background:rgba(255,255,255,0.08);
-    border-radius:10px;
-    padding:8px 10px;
+    background:var(--panel-2);
+    border:1px solid var(--line-soft);
+    border-radius:11px;
+    padding:9px 11px;
   }
-  .summary .pill-label{
-    font-size:11px;
-    color:#B9C8BE;
-    margin:0 0 2px;
+  .pill-label{font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:1px; margin:0 0 2px;}
+  .pill-value{font-size:15px; font-weight:600; margin:0;}
+  .pill-value.income{color:var(--mint);}
+  .pill-value.expense{color:var(--coral);}
+
+  .sales-block{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    border-top:1px solid var(--line-soft);
+    padding-top:16px;
   }
-  .summary .pill-value{
-    font-size:15px;
+  .ring-wrap{position:relative; width:76px; height:76px; flex-shrink:0;}
+  .ring-wrap svg{transform:rotate(-90deg);}
+  .ring-pct{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; font-weight:700;
+  }
+  .sales-info .sales-label{font-size:10px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:1px; margin:0 0 3px;}
+  .sales-info .sales-value{font-size:18px; font-weight:700; margin:0 0 3px; color:var(--amber);}
+  .sales-info .sales-target{font-size:11px; color:var(--ink-soft); margin:0;}
+  .sales-empty{font-size:12px; color:var(--ink-soft); flex:1;}
+  .sales-empty button{
+    margin-top:6px;
+    border:1px solid rgba(245,196,82,0.4);
+    background:rgba(245,196,82,0.10);
+    color:var(--amber);
+    border-radius:8px;
+    padding:6px 12px;
+    font-family:'Sarabun',sans-serif;
+    font-size:12px;
     font-weight:600;
-    margin:0;
   }
-  .summary .pill-value.income{color:#E6C97A;}
-  .summary .pill-value.expense{color:#E8A491;}
 
   .card{
-    background:var(--card);
-    border:1px solid var(--paper-line);
+    background:var(--panel);
+    border:1px solid var(--line);
     border-radius:14px;
     padding:14px;
     margin-bottom:14px;
   }
   .card-title{
-    font-size:14px;
-    font-weight:600;
-    margin:0 0 10px;
-    color:var(--ink);
+    font-size:11px;
+    font-weight:700;
+    margin:0 0 12px;
+    color:var(--ink-faint);
+    text-transform:uppercase;
+    letter-spacing:1.5px;
   }
-  .type-toggle{
-    display:flex;
-    gap:8px;
-    margin-bottom:10px;
-  }
+  .type-toggle{display:flex; gap:8px; margin-bottom:10px;}
   .type-btn{
     flex:1;
-    border:1px solid var(--paper-line);
-    background:var(--paper);
+    border:1px solid var(--line);
+    background:var(--panel-2);
     border-radius:10px;
     padding:9px 0;
     font-family:'Sarabun',sans-serif;
@@ -112,37 +223,23 @@
     font-weight:600;
     color:var(--ink-soft);
   }
-  .type-btn.active-income{
-    background:var(--gold-bg);
-    border-color:var(--gold);
-    color:var(--gold);
-  }
-  .type-btn.active-expense{
-    background:var(--brick-bg);
-    border-color:var(--brick);
-    color:var(--brick);
-  }
+  .type-btn.active-income{background:var(--mint-dim); border-color:rgba(61,232,160,0.45); color:var(--mint);}
+  .type-btn.active-expense{background:var(--coral-dim); border-color:rgba(255,107,107,0.45); color:var(--coral);}
+
   .field{margin-bottom:10px;}
-  .field label{
-    display:block;
-    font-size:12px;
-    color:var(--ink-soft);
-    margin-bottom:4px;
-  }
+  .field label{display:block; font-size:11px; color:var(--ink-faint); margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;}
   .field input, .field select{
     width:100%;
     font-family:'Sarabun',sans-serif;
     font-size:15px;
     padding:9px 10px;
-    border:1px solid var(--paper-line);
+    border:1px solid var(--line);
     border-radius:9px;
-    background:#FFFEFB;
+    background:var(--panel-2);
     color:var(--ink);
   }
-  .field input:focus, .field select:focus{
-    outline:2px solid var(--ink);
-    outline-offset:0;
-  }
+  .field input[type=number]{font-family:'JetBrains Mono',monospace;}
+  .field input:focus, .field select:focus{outline:1px solid var(--mint); outline-offset:0;}
   .row2{display:flex; gap:10px;}
   .row2 .field{flex:1;}
   .add-btn{
@@ -153,97 +250,90 @@
     font-family:'Sarabun',sans-serif;
     font-size:15px;
     font-weight:700;
-    background:var(--ink);
-    color:var(--paper);
+    background:var(--mint);
+    color:#04140D;
     margin-top:2px;
   }
   .add-btn:active{opacity:0.85;}
-  .error-msg{
+  .error-msg{font-size:12px; color:var(--coral); margin:-4px 0 8px; display:none;}
+
+  .list-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding:0 2px;}
+  .list-title{font-size:11px; font-weight:700; color:var(--ink-faint); text-transform:uppercase; letter-spacing:1.5px; margin:0;}
+  .filter-tabs{display:flex; gap:6px; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:3px;}
+  .filter-tab{
+    border:none;
+    background:transparent;
+    color:var(--ink-faint);
+    font-family:'Sarabun',sans-serif;
     font-size:12px;
-    color:var(--brick);
-    margin:-4px 0 8px;
-    display:none;
-  }
-  .list-title{
-    font-size:13px;
     font-weight:600;
-    color:var(--ink-soft);
-    margin:0 0 8px;
-    padding:0 2px;
+    padding:6px 10px;
+    border-radius:7px;
   }
+  .filter-tab.active{background:var(--panel); color:var(--ink);}
+  .filter-tab.active.income{color:var(--mint);}
+  .filter-tab.active.expense{color:var(--coral);}
+
   .entry{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    background:var(--card);
-    border:1px solid var(--paper-line);
-    border-radius:12px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-left:3px solid var(--line);
+    border-radius:11px;
     padding:11px 12px;
     margin-bottom:8px;
   }
+  .entry.income{border-left-color:var(--mint);}
+  .entry.expense{border-left-color:var(--coral);}
   .entry-left{min-width:0;}
-  .entry-item{
-    font-size:14px;
-    font-weight:600;
-    margin:0 0 2px;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-  .entry-meta{
-    font-size:12px;
-    color:var(--ink-soft);
-    margin:0;
-  }
-  .entry-right{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    flex-shrink:0;
-    padding-left:8px;
-  }
-  .entry-amount{
-    font-size:15px;
-    font-weight:700;
-    white-space:nowrap;
-  }
-  .entry-amount.income{color:var(--gold);}
-  .entry-amount.expense{color:var(--brick);}
-  .del-btn{
-    border:none;
-    background:transparent;
-    color:var(--ink-soft);
-    font-size:18px;
-    line-height:1;
-    padding:4px 2px;
-  }
-  .empty{
-    text-align:center;
-    color:var(--ink-soft);
-    font-size:13px;
-    padding:20px 0;
-  }
+  .entry-item{font-size:14px; font-weight:600; margin:0 0 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .entry-meta{font-size:11px; color:var(--ink-faint); margin:0;}
+  .entry-right{display:flex; align-items:center; gap:10px; flex-shrink:0; padding-left:8px;}
+  .entry-amount{font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; white-space:nowrap;}
+  .entry-amount.income{color:var(--mint);}
+  .entry-amount.expense{color:var(--coral);}
+  .del-btn{border:none; background:transparent; color:var(--ink-faint); font-size:17px; line-height:1; padding:4px 2px;}
+  .empty{text-align:center; color:var(--ink-faint); font-size:13px; padding:24px 0;}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;">รายรับรายจ่ายร้านขายอาหาร คำนวณอัตโนมัติ</h1>
-  <h1>บันทึกรายรับ-รายจ่าย</h1>
-  <p class="sub">ร้านขายอาหาร &middot; คำนวณยอดให้อัตโนมัติทุกครั้งที่บันทึก</p>
+  <h1 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;">รายรับรายจ่ายร้านขายอาหาร คำนวณอัตโนมัติ พร้อมเป้าหมายยอดขาย</h1>
 
-  <div class="summary">
+  <div class="topbar">
+    <div class="topbar-text">
+      <h1>บันทึกรายรับ-รายจ่าย</h1>
+      <p class="sub">Food stall ledger</p>
+    </div>
+    <button class="icon-btn" id="settingsBtn" aria-label="ตั้งค่าเป้าหมายยอดขาย">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+    </button>
+  </div>
+
+  <div class="settings-panel" id="settingsPanel">
+    <p class="st-title">เป้าหมายยอดขาย (บาท)</p>
+    <div class="settings-row">
+      <input type="number" id="targetInput" placeholder="เช่น 10000" inputmode="decimal" min="0" step="1">
+      <button id="saveTargetBtn">บันทึก</button>
+    </div>
+  </div>
+
+  <div class="dash">
     <p class="net-label">คงเหลือสุทธิ</p>
-    <p class="net-value" id="netValue">0 บาท</p>
-    <div class="row">
+    <p class="net-value mono" id="netValue">0 บาท</p>
+    <div class="pill-row">
       <div class="pill">
         <p class="pill-label">รายรับรวม</p>
-        <p class="pill-value income" id="totalIncome">0</p>
+        <p class="pill-value income mono" id="totalIncome">0</p>
       </div>
       <div class="pill">
         <p class="pill-label">รายจ่ายรวม</p>
-        <p class="pill-value expense" id="totalExpense">0</p>
+        <p class="pill-value expense mono" id="totalExpense">0</p>
       </div>
     </div>
+    <div class="sales-block" id="salesBlock"></div>
   </div>
 
   <div class="card">
@@ -259,12 +349,7 @@
     <div class="row2">
       <div class="field">
         <label for="categoryInput">หมวดหมู่</label>
-        <select id="categoryInput">
-          <option value="รายได้จากการขาย">รายได้จากการขาย</option>
-          <option value="เงินกู้ยืม">เงินกู้ยืม</option>
-          <option value="วัตถุดิบ">วัตถุดิบ</option>
-          <option value="ค่าใช้จ่ายอื่นๆ">ค่าใช้จ่ายอื่นๆ</option>
-        </select>
+        <select id="categoryInput"></select>
       </div>
       <div class="field">
         <label for="amountInput">จำนวนเงิน (บาท)</label>
@@ -272,28 +357,38 @@
       </div>
     </div>
     <p class="error-msg" id="errorMsg">กรอกรายการและจำนวนเงินให้ครบก่อนบันทึก</p>
-    <p class="error-msg" id="storageMsg" role="status"></p>
     <button class="add-btn" id="addBtn">บันทึกรายการ</button>
   </div>
 
-  <p class="list-title">รายการทั้งหมด</p>
+  <div class="list-head">
+    <p class="list-title">รายการทั้งหมด</p>
+    <div class="filter-tabs">
+      <button class="filter-tab active" data-filter="all">ทั้งหมด</button>
+      <button class="filter-tab" data-filter="income">รายรับ</button>
+      <button class="filter-tab" data-filter="expense">รายจ่าย</button>
+    </div>
+  </div>
   <div id="entryList"></div>
 </div>
 
 <script>
 let entries = [];
 let currentType = 'income';
+let currentFilter = 'all';
+let salesTarget = null;
 const STORAGE_KEY = 'food-tracker.entries.v1';
+const TARGET_KEY = 'food-tracker.salesTarget.v1';
+const SALES_CATEGORY = 'รายได้จากการขาย';
 
 const seedEntries = [
-  {id: 1, date: '7 ก.ย. 2569', item: 'ยืมเงิน', category: 'เงินกู้ยืม', type: 'income', amount: 5000},
-  {id: 2, date: '7 ก.ย. 2569', item: 'หมู', category: 'วัตถุดิบ', type: 'expense', amount: 580},
-  {id: 3, date: '7 ก.ย. 2569', item: 'หมู', category: 'วัตถุดิบ', type: 'expense', amount: 542},
-  {id: 4, date: '7 ก.ย. 2569', item: 'ไข่', category: 'วัตถุดิบ', type: 'expense', amount: 165},
-  {id: 5, date: '7 ก.ย. 2569', item: 'กุนเชียง', category: 'วัตถุดิบ', type: 'expense', amount: 140},
-  {id: 6, date: '7 ก.ย. 2569', item: 'น้ำมัน', category: 'วัตถุดิบ', type: 'expense', amount: 280},
-  {id: 7, date: '7 ก.ย. 2569', item: 'น้ำผึ้ง', category: 'วัตถุดิบ', type: 'expense', amount: 152},
-  {id: 8, date: '7 ก.ย. 2569', item: 'เครื่องปรุง', category: 'วัตถุดิบ', type: 'expense', amount: 150}
+  {id: '1', date: '7 ก.ย. 2569', item: 'ยืมเงิน', category: 'เงินกู้ยืม', type: 'income', amount: 5000},
+  {id: '2', date: '7 ก.ย. 2569', item: 'หมู', category: 'วัตถุดิบ', type: 'expense', amount: 580},
+  {id: '3', date: '7 ก.ย. 2569', item: 'หมู', category: 'วัตถุดิบ', type: 'expense', amount: 542},
+  {id: '4', date: '7 ก.ย. 2569', item: 'ไข่', category: 'วัตถุดิบ', type: 'expense', amount: 165},
+  {id: '5', date: '7 ก.ย. 2569', item: 'กุนเชียง', category: 'วัตถุดิบ', type: 'expense', amount: 140},
+  {id: '6', date: '7 ก.ย. 2569', item: 'น้ำมัน', category: 'วัตถุดิบ', type: 'expense', amount: 280},
+  {id: '7', date: '7 ก.ย. 2569', item: 'น้ำผึ้ง', category: 'วัตถุดิบ', type: 'expense', amount: 152},
+  {id: '8', date: '7 ก.ย. 2569', item: 'เครื่องปรุง', category: 'วัตถุดิบ', type: 'expense', amount: 150}
 ];
 
 function formatBaht(n){
@@ -304,10 +399,10 @@ function formatBaht(n){
   });
 }
 
-function storageMessage(message = ''){
-  const el = document.getElementById('storageMsg');
-  el.textContent = message;
-  el.style.display = message ? 'block' : 'none';
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
 
 function validEntries(value){
@@ -329,6 +424,12 @@ function validEntries(value){
   }));
 }
 
+function todayLabel(){
+  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const d = new Date();
+  return d.getDate() + ' ' + months[d.getMonth()] + ' ' + (d.getFullYear() + 543);
+}
+
 function setType(type){
   currentType = type;
   document.getElementById('btnIncome').className = 'type-btn' + (type === 'income' ? ' active-income' : '');
@@ -336,7 +437,7 @@ function setType(type){
   const cat = document.getElementById('categoryInput');
   cat.innerHTML = '';
   const opts = type === 'income'
-    ? ['รายได้จากการขาย', 'เงินกู้ยืม', 'รายรับอื่นๆ']
+    ? [SALES_CATEGORY, 'เงินกู้ยืม', 'รายรับอื่นๆ']
     : ['วัตถุดิบ', 'ค่าเช่า', 'ค่าน้ำ-ไฟ', 'ค่าใช้จ่ายอื่นๆ'];
   opts.forEach(o => {
     const el = document.createElement('option');
@@ -346,31 +447,68 @@ function setType(type){
   });
 }
 
-function todayLabel(){
-  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-  const d = new Date();
-  return d.getDate() + ' ' + months[d.getMonth()] + ' ' + (d.getFullYear() + 543);
+function setFilter(filter){
+  currentFilter = filter;
+  document.querySelectorAll('.filter-tab').forEach(btn => {
+    const isActive = btn.getAttribute('data-filter') === filter;
+    btn.className = 'filter-tab' + (isActive ? ' active ' + filter : '');
+  });
+  renderList();
 }
 
-function render(){
-  let income = 0, expense = 0;
-  entries.forEach(e => {
-    if(e.type === 'income') income += Number(e.amount);
-    else expense += Number(e.amount);
-  });
-  document.getElementById('totalIncome').textContent = formatBaht(income) + ' บาท';
-  document.getElementById('totalExpense').textContent = formatBaht(expense) + ' บาท';
-  document.getElementById('netValue').textContent = formatBaht(income - expense) + ' บาท';
+function renderRing(pct){
+  const clamped = Math.max(0, Math.min(100, pct));
+  const r = 32, c = 2 * Math.PI * r;
+  const offset = c - (clamped / 100) * c;
+  const color = clamped >= 100 ? 'var(--mint)' : 'var(--amber)';
+  return `
+    <svg width="76" height="76" viewBox="0 0 76 76">
+      <circle cx="38" cy="38" r="${r}" fill="none" stroke="var(--line)" stroke-width="7"></circle>
+      <circle cx="38" cy="38" r="${r}" fill="none" stroke="${color}" stroke-width="7"
+        stroke-dasharray="${c}" stroke-dashoffset="${offset}" stroke-linecap="round"></circle>
+    </svg>`;
+}
 
-  const list = document.getElementById('entryList');
-  list.innerHTML = '';
-  if(entries.length === 0){
-    list.innerHTML = '<div class="empty">ยังไม่มีรายการ เริ่มบันทึกได้เลย</div>';
+function renderSalesBlock(){
+  const block = document.getElementById('salesBlock');
+  const sales = entries
+    .filter(e => e.type === 'income' && e.category === SALES_CATEGORY)
+    .reduce((sum, e) => sum + Number(e.amount), 0);
+
+  if(salesTarget === null || salesTarget <= 0){
+    block.innerHTML = `
+      <div class="sales-empty">
+        ยังไม่ได้ตั้งเป้าหมายยอดขาย<br>
+        <button id="setTargetPrompt">ตั้งเป้าหมายตอนนี้</button>
+      </div>`;
+    document.getElementById('setTargetPrompt').addEventListener('click', openSettings);
     return;
   }
-  entries.slice().reverse().forEach(e => {
+
+  const pct = (sales / salesTarget) * 100;
+  block.innerHTML = `
+    <div class="ring-wrap">
+      ${renderRing(pct)}
+      <div class="ring-pct mono">${Math.round(Math.min(pct, 100))}%</div>
+    </div>
+    <div class="sales-info">
+      <p class="sales-label">ยอดขาย</p>
+      <p class="sales-value mono">${formatBaht(sales)}</p>
+      <p class="sales-target mono">เป้าหมาย ${formatBaht(salesTarget)} บาท</p>
+    </div>`;
+}
+
+function renderList(){
+  const list = document.getElementById('entryList');
+  const filtered = currentFilter === 'all' ? entries : entries.filter(e => e.type === currentFilter);
+  list.innerHTML = '';
+  if(filtered.length === 0){
+    list.innerHTML = '<div class="empty">ไม่มีรายการในหมวดนี้</div>';
+    return;
+  }
+  filtered.slice().reverse().forEach(e => {
     const row = document.createElement('div');
-    row.className = 'entry';
+    row.className = 'entry ' + e.type;
     row.innerHTML = `
       <div class="entry-left">
         <p class="entry-item">${escapeHtml(e.item)}</p>
@@ -388,20 +526,25 @@ function render(){
   });
 }
 
-function escapeHtml(str){
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
+function render(){
+  let income = 0, expense = 0;
+  entries.forEach(e => {
+    if(e.type === 'income') income += Number(e.amount);
+    else expense += Number(e.amount);
+  });
+  document.getElementById('totalIncome').textContent = formatBaht(income);
+  document.getElementById('totalExpense').textContent = formatBaht(expense);
+  document.getElementById('netValue').textContent = formatBaht(income - expense) + ' บาท';
+  renderSalesBlock();
+  renderList();
 }
 
 function saveEntries(){
   try{
     localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
-    storageMessage();
     return true;
   }catch(err){
     console.error('Storage save failed:', err);
-    storageMessage('บันทึกในอุปกรณ์ไม่ได้ โปรดตรวจสอบพื้นที่จัดเก็บของเบราว์เซอร์');
     return false;
   }
 }
@@ -414,15 +557,49 @@ function loadEntries(){
       if(parsed === null) throw new Error('Invalid saved entries');
       entries = parsed;
     } else {
-      entries = seedEntries.map(e => ({...e, id: String(e.id)}));
+      entries = seedEntries.map(e => ({...e}));
       saveEntries();
     }
   }catch(err){
     console.error('Storage load failed:', err);
-    entries = seedEntries.map(e => ({...e, id: String(e.id)}));
-    storageMessage('ไม่สามารถอ่านข้อมูลเดิมได้ จึงแสดงข้อมูลตัวอย่างชั่วคราว');
+    entries = seedEntries.map(e => ({...e}));
   }
-  render();
+}
+
+function loadTarget(){
+  try{
+    const saved = localStorage.getItem(TARGET_KEY);
+    salesTarget = saved !== null ? Number(saved) : null;
+    if(salesTarget !== null && !Number.isFinite(salesTarget)) salesTarget = null;
+  }catch(err){
+    salesTarget = null;
+  }
+}
+
+function saveTarget(value){
+  try{
+    localStorage.setItem(TARGET_KEY, String(value));
+    salesTarget = value;
+  }catch(err){
+    console.error('Target save failed:', err);
+  }
+}
+
+function openSettings(){
+  const panel = document.getElementById('settingsPanel');
+  panel.classList.add('open');
+  document.getElementById('settingsBtn').classList.add('active');
+  if(salesTarget !== null) document.getElementById('targetInput').value = salesTarget;
+}
+
+function toggleSettings(){
+  const panel = document.getElementById('settingsPanel');
+  if(panel.classList.contains('open')){
+    panel.classList.remove('open');
+    document.getElementById('settingsBtn').classList.remove('active');
+  } else {
+    openSettings();
+  }
 }
 
 function deleteEntry(id){
@@ -446,15 +623,14 @@ function addEntry(){
   }
   errorMsg.style.display = 'none';
 
-  const newEntry = {
+  entries.push({
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     date: todayLabel(),
     item: item,
     category: categoryInput.value,
     type: currentType,
     amount: amount
-  };
-  entries.push(newEntry);
+  });
   saveEntries();
   render();
 
@@ -466,6 +642,17 @@ function addEntry(){
 document.getElementById('btnIncome').addEventListener('click', () => setType('income'));
 document.getElementById('btnExpense').addEventListener('click', () => setType('expense'));
 document.getElementById('addBtn').addEventListener('click', addEntry);
+document.getElementById('settingsBtn').addEventListener('click', toggleSettings);
+document.getElementById('saveTargetBtn').addEventListener('click', () => {
+  const val = parseFloat(document.getElementById('targetInput').value);
+  if(!isNaN(val) && val > 0){
+    saveTarget(val);
+    renderSalesBlock();
+  }
+});
+document.querySelectorAll('.filter-tab').forEach(btn => {
+  btn.addEventListener('click', () => setFilter(btn.getAttribute('data-filter')));
+});
 document.getElementById('itemInput').addEventListener('input', () => {
   document.getElementById('errorMsg').style.display = 'none';
 });
@@ -473,11 +660,14 @@ document.getElementById('amountInput').addEventListener('input', () => {
   document.getElementById('errorMsg').style.display = 'none';
 });
 window.addEventListener('storage', event => {
-  if(event.key === STORAGE_KEY) loadEntries();
+  if(event.key === STORAGE_KEY){ loadEntries(); render(); }
+  if(event.key === TARGET_KEY){ loadTarget(); renderSalesBlock(); }
 });
 
 setType('income');
 loadEntries();
+loadTarget();
+render();
 </script>
 </body>
 </html>
