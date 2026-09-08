@@ -167,23 +167,12 @@
   .pill-value.expense{color:var(--coral);}
 
   .sales-block{
+    display:flex;
+    align-items:center;
+    gap:14px;
     border-top:1px solid var(--line-soft);
     padding-top:16px;
   }
-  .sales-col{display:flex; flex-direction:column; gap:10px;}
-  .sales-row{display:flex; align-items:center; gap:14px;}
-  .view-toggle{display:flex; gap:6px; background:var(--panel-2); border:1px solid var(--line); border-radius:9px; padding:3px; width:fit-content;}
-  .view-tab{
-    border:none;
-    background:transparent;
-    color:var(--ink-faint);
-    font-family:'Sarabun',sans-serif;
-    font-size:11px;
-    font-weight:600;
-    padding:5px 10px;
-    border-radius:6px;
-  }
-  .view-tab.active{background:var(--panel); color:var(--amber);}
   .ring-wrap{position:relative; width:76px; height:76px; flex-shrink:0;}
   .ring-wrap svg{transform:rotate(-90deg);}
   .ring-pct{
@@ -250,7 +239,6 @@
     color:var(--ink);
   }
   .field input[type=number]{font-family:'JetBrains Mono',monospace;}
-  .field input[type=date]{font-family:'JetBrains Mono',monospace; color-scheme:dark;}
   .field input:focus, .field select:focus{outline:1px solid var(--mint); outline-offset:0;}
   .row2{display:flex; gap:10px;}
   .row2 .field{flex:1;}
@@ -382,7 +370,12 @@
   <div class="card">
     <p class="card-title">สำรองข้อมูล</p>
     <div class="type-toggle">
-      <button type="button" class="type-btn" id="exportBtn">ส่งออก JSON</button>
+      <button type="button" class="type-btn" id="exportBtn">ดาวน์โหลด JSON</button>
+      <button type="button" class="type-btn" id="copyExportBtn">คัดลอกข้อความ</button>
+    </div>
+    <textarea id="exportText" readonly aria-label="ข้อมูล JSON" style="display:none;width:100%;min-height:150px;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--panel-2);color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:11px;resize:vertical;"></textarea>
+    <p id="backupStatus" style="font-size:11px;color:var(--ink-soft);margin:8px 0 0;"></p>
+    <div class="type-toggle" style="display:none">
       <button type="button" class="type-btn" id="importBtn">นำเข้า JSON</button>
     </div>
     <input type="file" id="importFile" accept=".json,application/json" style="display:none">
@@ -428,11 +421,8 @@ let entries = [];
 let currentType = 'income';
 let currentFilter = 'all';
 let salesTarget = null;
-let salesView = 'today';
-let editingId = null;
 const STORAGE_KEY = 'food-tracker.entries.v1';
 const TARGET_KEY = 'food-tracker.salesTarget.v1';
-const VIEW_KEY = 'food-tracker.salesView.v1';
 const SALES_CATEGORY = 'รายได้จากการขาย';
 
 const seedEntries = [
@@ -460,33 +450,6 @@ function escapeHtml(str){
   return div.innerHTML;
 }
 
-function isoDateFromThaiLabel(label){
-  const parts = String(label).split(/\s+/);
-  if(parts.length !== 3) return '';
-  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-  const month = months.indexOf(parts[1]);
-  if(month < 0) return '';
-  return `${Number(parts[2]) - 543}-${String(month + 1).padStart(2, '0')}-${String(parts[0]).padStart(2, '0')}`;
-}
-
-function thaiLabelFromISO(value){
-  if(!value) return '';
-  const d = new Date(value + 'T00:00:00');
-  if(Number.isNaN(d.getTime())) return '';
-  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-  return d.getDate() + ' ' + months[d.getMonth()] + ' ' + (d.getFullYear() + 543);
-}
-
-function getTodayISO(){
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
-function dateValueForEntry(e){
-  if(e.isoDate) return e.isoDate;
-  return isoDateFromThaiLabel(e.date);
-}
-
 function validEntries(value){
   if(!Array.isArray(value)) return null;
   return value.filter(e =>
@@ -508,7 +471,9 @@ function validEntries(value){
 }
 
 function todayLabel(){
-  return thaiLabelFromISO(getTodayISO());
+  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const d = new Date();
+  return d.getDate() + ' ' + months[d.getMonth()] + ' ' + (d.getFullYear() + 543);
 }
 
 function setType(type){
@@ -550,61 +515,33 @@ function renderRing(pct){
     </svg>`;
 }
 
-function setSalesView(view){
-  salesView = view;
-  try{ localStorage.setItem(VIEW_KEY, view); }catch(err){ console.error('View save failed:', err); }
-  renderSalesBlock();
-}
-
 function renderSalesBlock(){
   const block = document.getElementById('salesBlock');
-  const todayISO = getTodayISO();
-  const todaySales = entries
-    .filter(e => e.type === 'income' && e.category === SALES_CATEGORY && dateValueForEntry(e) === todayISO)
-    .reduce((sum, e) => sum + Number(e.amount), 0);
-  const allSales = entries
+  const sales = entries
     .filter(e => e.type === 'income' && e.category === SALES_CATEGORY)
     .reduce((sum, e) => sum + Number(e.amount), 0);
-  const sales = salesView === 'today' ? todaySales : allSales;
-
-  const toggleHtml = `
-    <div class="view-toggle">
-      <button class="view-tab${salesView === 'today' ? ' active' : ''}" data-view="today">วันนี้</button>
-      <button class="view-tab${salesView === 'all' ? ' active' : ''}" data-view="all">ทั้งหมด</button>
-    </div>`;
 
   if(salesTarget === null || salesTarget <= 0){
     block.innerHTML = `
-      <div class="sales-col">
-        ${toggleHtml}
-        <div class="sales-empty">
-          ยังไม่ได้ตั้งเป้าหมายยอดขาย<br>
-          <button id="setTargetPrompt">ตั้งเป้าหมายตอนนี้</button>
-        </div>
+      <div class="sales-empty">
+        ยังไม่ได้ตั้งเป้าหมายยอดขาย<br>
+        <button id="setTargetPrompt">ตั้งเป้าหมายตอนนี้</button>
       </div>`;
     document.getElementById('setTargetPrompt').addEventListener('click', openSettings);
-  } else {
-    const pct = (sales / salesTarget) * 100;
-    block.innerHTML = `
-      <div class="sales-col">
-        ${toggleHtml}
-        <div class="sales-row">
-          <div class="ring-wrap">
-            ${renderRing(pct)}
-            <div class="ring-pct mono">${Math.round(Math.min(pct, 100))}%</div>
-          </div>
-          <div class="sales-info">
-            <p class="sales-label">ยอดขาย${salesView === 'today' ? 'วันนี้' : 'สะสม'}</p>
-            <p class="sales-value mono">${formatBaht(sales)}</p>
-            <p class="sales-target mono">เป้าหมาย ${formatBaht(salesTarget)} บาท</p>
-          </div>
-        </div>
-      </div>`;
+    return;
   }
 
-  block.querySelectorAll('.view-tab').forEach(btn => {
-    btn.addEventListener('click', () => setSalesView(btn.getAttribute('data-view')));
-  });
+  const pct = (sales / salesTarget) * 100;
+  block.innerHTML = `
+    <div class="ring-wrap">
+      ${renderRing(pct)}
+      <div class="ring-pct mono">${Math.round(Math.min(pct, 100))}%</div>
+    </div>
+    <div class="sales-info">
+      <p class="sales-label">ยอดขาย</p>
+      <p class="sales-value mono">${formatBaht(sales)}</p>
+      <p class="sales-target mono">เป้าหมาย ${formatBaht(salesTarget)} บาท</p>
+    </div>`;
 }
 
 function renderList(){
@@ -701,15 +638,6 @@ function saveTarget(value){
   }
 }
 
-function loadSalesView(){
-  try{
-    const saved = localStorage.getItem(VIEW_KEY);
-    salesView = (saved === 'today' || saved === 'all') ? saved : 'today';
-  }catch(err){
-    salesView = 'today';
-  }
-}
-
 function openSettings(){
   const panel = document.getElementById('settingsPanel');
   panel.classList.add('open');
@@ -727,9 +655,42 @@ function toggleSettings(){
   }
 }
 
+
+
+let editingId = null;
+
+function isoDateFromThaiLabel(label){
+  const m = String(label).match(/^(\d{1,2})\s+\S+\s+(\d{4})$/);
+  if(!m) return '';
+  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const parts = String(label).split(/\s+/);
+  const month = months.indexOf(parts[1]);
+  if(month < 0) return '';
+  return `${Number(parts[2]) - 543}-${String(month+1).padStart(2,'0')}-${String(parts[0]).padStart(2,'0')}`;
+}
+
+function dateValueForEntry(e){
+  if(e.isoDate) return e.isoDate;
+  return isoDateFromThaiLabel(e.date);
+}
+
+function thaiLabelFromISO(value){
+  if(!value) return '';
+  const d = new Date(value + 'T00:00:00');
+  if(Number.isNaN(d.getTime())) return '';
+  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return d.getDate() + ' ' + months[d.getMonth()] + ' ' + (d.getFullYear() + 543);
+}
+
 function setDefaultDate(){
   const el = document.getElementById('dateInput');
-  if(el && !el.value) el.value = getTodayISO();
+  if(el && !el.value) {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    el.value = `${y}-${m}-${day}`;
+  }
 }
 
 function editEntry(id){
@@ -761,26 +722,22 @@ function updatePeriodSummary(){
   let list = entries;
   if(from) list = list.filter(e => dateValueForEntry(e) >= from);
   if(to) list = list.filter(e => dateValueForEntry(e) <= to);
-  const income = list.filter(e => e.type === 'income').reduce((s, e) => s + Number(e.amount), 0);
-  const expense = list.filter(e => e.type === 'expense').reduce((s, e) => s + Number(e.amount), 0);
+  const income = list.filter(e => e.type === 'income').reduce((s,e)=>s+Number(e.amount),0);
+  const expense = list.filter(e => e.type === 'expense').reduce((s,e)=>s+Number(e.amount),0);
   document.getElementById('periodIncome').textContent = formatBaht(income);
   document.getElementById('periodExpense').textContent = formatBaht(expense);
 }
 
+function buildBackupData(){ return {version:2, exportedAt:new Date().toISOString(), entries, salesTarget}; }
+function buildBackupText(){ return JSON.stringify(buildBackupData(), null, 2); }
 function exportData(){
-  const payload = {
-    version: 2,
-    exportedAt: new Date().toISOString(),
-    entries,
-    salesTarget
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'food-tracker-backup.json';
-  a.click();
-  URL.revokeObjectURL(url);
+  try{ const blob=new Blob([buildBackupText()],{type:'application/json;charset=utf-8'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='food-tracker-backup.json'; a.style.display='none'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000); document.getElementById('backupStatus').textContent='ส่งออกข้อมูลแล้ว หากไม่พบไฟล์ ให้ใช้ “คัดลอกข้อความ”'; }
+  catch(e){ document.getElementById('backupStatus').textContent='เบราว์เซอร์นี้บล็อกการดาวน์โหลด ให้ใช้ “คัดลอกข้อความ”'; }
+}
+async function copyExportText(){
+  const text=buildBackupText(), box=document.getElementById('exportText'), status=document.getElementById('backupStatus'); box.value=text; box.style.display='block';
+  try{ if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(text); status.textContent='คัดลอก JSON แล้ว'; return; } }catch(e){}
+  box.focus(); box.select(); try{ const ok=document.execCommand('copy'); status.textContent=ok?'คัดลอก JSON แล้ว':'คัดลอกอัตโนมัติไม่ได้ ให้กดค้างที่ข้อความแล้วเลือกคัดลอก'; }catch(e){ status.textContent='คัดลอกอัตโนมัติไม่ได้ ให้กดค้างที่ข้อความแล้วเลือกคัดลอก'; }
 }
 
 function importData(file){
@@ -833,7 +790,7 @@ function addEntry(){
       e.type = currentType;
       e.amount = amount;
     }
-  } else {
+  }else{
     entries.push({
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       date: thaiLabelFromISO(dateValue),
@@ -886,6 +843,7 @@ document.getElementById('dateInput').addEventListener('input', () => {
 document.getElementById('summaryFrom').addEventListener('change', updatePeriodSummary);
 document.getElementById('summaryTo').addEventListener('change', updatePeriodSummary);
 document.getElementById('exportBtn').addEventListener('click', exportData);
+document.getElementById('copyExportBtn').addEventListener('click', copyExportText);
 document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
 document.getElementById('importFile').addEventListener('change', e => {
   if(e.target.files[0]) importData(e.target.files[0]);
@@ -894,13 +852,11 @@ document.getElementById('importFile').addEventListener('change', e => {
 window.addEventListener('storage', event => {
   if(event.key === STORAGE_KEY){ loadEntries(); render(); }
   if(event.key === TARGET_KEY){ loadTarget(); renderSalesBlock(); }
-  if(event.key === VIEW_KEY){ loadSalesView(); renderSalesBlock(); }
 });
 
 setType('income');
 loadEntries();
 loadTarget();
-loadSalesView();
 setDefaultDate();
 render();
 </script>
