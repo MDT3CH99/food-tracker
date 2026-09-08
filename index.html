@@ -420,20 +420,462 @@
 let entries = [];
 let currentType = 'income';
 let currentFilter = 'all';
-let salesTarget = null;
+let salesTarget = 5000;
 const STORAGE_KEY = 'food-tracker.entries.v1';
 const TARGET_KEY = 'food-tracker.salesTarget.v1';
 const SALES_CATEGORY = 'รายได้จากการขาย';
 
 const seedEntries = [
-  {id: '1', date: '7 ก.ย. 2569', item: 'ยืมเงิน', category: 'เงินกู้ยืม', type: 'income', amount: 5000},
-  {id: '2', date: '7 ก.ย. 2569', item: 'หมู', category: 'วัตถุดิบ', type: 'expense', amount: 580},
-  {id: '3', date: '7 ก.ย. 2569', item: 'หมู', category: 'วัตถุดิบ', type: 'expense', amount: 542},
-  {id: '4', date: '7 ก.ย. 2569', item: 'ไข่', category: 'วัตถุดิบ', type: 'expense', amount: 165},
-  {id: '5', date: '7 ก.ย. 2569', item: 'กุนเชียง', category: 'วัตถุดิบ', type: 'expense', amount: 140},
-  {id: '6', date: '7 ก.ย. 2569', item: 'น้ำมัน', category: 'วัตถุดิบ', type: 'expense', amount: 280},
-  {id: '7', date: '7 ก.ย. 2569', item: 'น้ำผึ้ง', category: 'วัตถุดิบ', type: 'expense', amount: 152},
-  {id: '8', date: '7 ก.ย. 2569', item: 'เครื่องปรุง', category: 'วัตถุดิบ', type: 'expense', amount: 150}
+  {
+    "id": "1",
+    "date": "7 ก.ย. 2569",
+    "isoDate": "2026-09-07",
+    "item": "ยืมเงิน",
+    "category": "เงินกู้ยืม",
+    "type": "income",
+    "amount": 5000
+  },
+  {
+    "id": "2",
+    "date": "7 ก.ย. 2569",
+    "isoDate": "2026-09-07",
+    "item": "หมู",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 580
+  },
+  {
+    "id": "3",
+    "date": "7 ก.ย. 2569",
+    "isoDate": "2026-09-07",
+    "item": "หมู",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 542
+  },
+  {
+    "id": "4",
+    "date": "7 ก.ย. 2569",
+    "isoDate": "2026-09-07",
+    "item": "ไข่",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 165
+  },
+  {
+    "id": "5",
+    "date": "7 ก.ย. 2569",
+    "isoDate": "2026-09-07",
+    "item": "กุนเชียง",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 140
+  },
+  {
+    "id": "6",
+    "date": "7 ก.ย. 2569",
+    "isoDate": "2026-09-07",
+    "item": "น้ำมัน",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 280
+  },
+  {
+    "id": "7",
+    "date": "7 ก.ย. 2569",
+    "isoDate": "2026-09-07",
+    "item": "น้ำผึ้ง",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 152
+  },
+  {
+    "id": "8",
+    "date": "7 ก.ย. 2569",
+    "isoDate": "2026-09-07",
+    "item": "เครื่องปรุง",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 150
+  },
+  {
+    "id": "1788761298249-9tjnl3",
+    "date": "7 ก.ย. 2569",
+    "isoDate": "2026-09-07",
+    "item": "กะทิ",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 80
+  },
+  {
+    "id": "1788784164864-oeeir2",
+    "date": "7 ก.ย. 2569",
+    "isoDate": "2026-09-07",
+    "item": "น้ำมัน",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 180
+  },
+  {
+    "id": "1788784175110-sypsxc",
+    "date": "7 ก.ย. 2569",
+    "isoDate": "2026-09-07",
+    "item": "ป้าย",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 430
+  },
+  {
+    "id": "1788827934647-guw73x",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ข้าว+พริกทอด",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 68
+  },
+  {
+    "id": "1788827961472-xzbv88",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "โครงไก่",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 100
+  },
+  {
+    "id": "1788827982653-e88ho7",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ต้นหอม",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 50
+  },
+  {
+    "id": "1788827994653-7veoet",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "พริกเขียว",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 20
+  },
+  {
+    "id": "1788828001166-7nqx30",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "แตงกวา",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 15
+  },
+  {
+    "id": "1788828011810-q6s9cw",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "กล่องข้าว",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 210
+  },
+  {
+    "id": "1788828026456-vkal06",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ผักกาดดอง",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 30
+  },
+  {
+    "id": "1788828036650-c50llc",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ถุง",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 160
+  },
+  {
+    "id": "1788828170318-psg071",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 560
+  },
+  {
+    "id": "1788828178673-ckk24a",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 270
+  },
+  {
+    "id": "1788828194020-bgbe1o",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 130
+  },
+  {
+    "id": "1788828692405-blioyr",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 60
+  },
+  {
+    "id": "1788830889291-7z2qcf",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ข้าว",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 200
+  },
+  {
+    "id": "1788834478383-jjlppe",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 140
+  },
+  {
+    "id": "1788834484573-wgd2tn",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 50
+  },
+  {
+    "id": "1788834490355-iqh4qs",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 140
+  },
+  {
+    "id": "1788837937668-1pcvz2",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ข้าว",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 150
+  },
+  {
+    "id": "1788837954057-wofzdy",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "เครื่องทำน้ำราด",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 200
+  },
+  {
+    "id": "1788837958825-hwkjc9",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ต้นหอม",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 50
+  },
+  {
+    "id": "1788839199317-ok3qvv",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 140
+  },
+  {
+    "id": "1788839210226-mlnpp0",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 130
+  },
+  {
+    "id": "1788839245037-mbq9q3",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 80
+  },
+  {
+    "id": "1788841381262-qgwwzy",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 270
+  },
+  {
+    "id": "1788843972339-a3abyn",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 360
+  },
+  {
+    "id": "1788844089887-f83bu1",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 210
+  },
+  {
+    "id": "1788844106809-qohx1p",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "กุนเชียง",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 72
+  },
+  {
+    "id": "1788845306494-ci88cf",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 82
+  },
+  {
+    "id": "1788847064840-izpuvf",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 90
+  },
+  {
+    "id": "1788847078419-ujuxzy",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 80
+  },
+  {
+    "id": "1788847090748-9idtbf",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 82
+  },
+  {
+    "id": "1788847106572-wahbbj",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 120
+  },
+  {
+    "id": "1788848361599-76lu1s",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 80
+  },
+  {
+    "id": "1788851124608-9733je",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 200
+  },
+  {
+    "id": "1788851889622-b1hyb7",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 140
+  },
+  {
+    "id": "1788851897839-neri2i",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 200
+  },
+  {
+    "id": "1788856420463-518idl",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "หมู",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 1537
+  },
+  {
+    "id": "1788856510169-ghlu0p",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ไข่นะจ๊ะ",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 330
+  },
+  {
+    "id": "1788856537392-0totmp",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ผงน้ำราด",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 168
+  },
+  {
+    "id": "1788858084928-0k0xdz",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 60
+  }
 ];
 
 function formatBaht(n){
@@ -616,6 +1058,24 @@ function loadEntries(){
   }catch(err){
     console.error('Storage load failed:', err);
     entries = seedEntries.map(e => ({...e}));
+  }
+}
+
+
+const DATA_IMPORT_VERSION = '2026-09-08-latest-backup-v1';
+
+function applyLatestBackupOnce(){
+  try{
+    if(localStorage.getItem('food-tracker.dataVersion') !== DATA_IMPORT_VERSION){
+      entries = seedEntries.map(e => ({...e}));
+      saveEntries();
+      if(Number.isFinite(Number(salesTarget)) && Number(salesTarget) > 0){
+        localStorage.setItem(TARGET_KEY, String(salesTarget));
+      }
+      localStorage.setItem('food-tracker.dataVersion', DATA_IMPORT_VERSION);
+    }
+  }catch(err){
+    console.error('Latest backup migration failed:', err);
   }
 }
 
@@ -855,6 +1315,9 @@ window.addEventListener('storage', event => {
 });
 
 setType('income');
+loadEntries();
+loadTarget();
+applyLatestBackupOnce();
 loadEntries();
 loadTarget();
 setDefaultDate();
