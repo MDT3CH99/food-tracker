@@ -167,12 +167,23 @@
   .pill-value.expense{color:var(--coral);}
 
   .sales-block{
-    display:flex;
-    align-items:center;
-    gap:14px;
     border-top:1px solid var(--line-soft);
     padding-top:16px;
   }
+  .sales-col{display:flex; flex-direction:column; gap:10px;}
+  .sales-row{display:flex; align-items:center; gap:14px;}
+  .view-toggle{display:flex; gap:6px; background:var(--panel-2); border:1px solid var(--line); border-radius:9px; padding:3px; width:fit-content;}
+  .view-tab{
+    border:none;
+    background:transparent;
+    color:var(--ink-faint);
+    font-family:'Sarabun',sans-serif;
+    font-size:11px;
+    font-weight:600;
+    padding:5px 10px;
+    border-radius:6px;
+  }
+  .view-tab.active{background:var(--panel); color:var(--amber);}
   .ring-wrap{position:relative; width:76px; height:76px; flex-shrink:0;}
   .ring-wrap svg{transform:rotate(-90deg);}
   .ring-pct{
@@ -239,6 +250,7 @@
     color:var(--ink);
   }
   .field input[type=number]{font-family:'JetBrains Mono',monospace;}
+  .field input[type=date]{font-family:'JetBrains Mono',monospace; color-scheme:dark;}
   .field input:focus, .field select:focus{outline:1px solid var(--mint); outline-offset:0;}
   .row2{display:flex; gap:10px;}
   .row2 .field{flex:1;}
@@ -294,7 +306,10 @@
   .entry-amount{font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:600; white-space:nowrap;}
   .entry-amount.income{color:var(--mint);}
   .entry-amount.expense{color:var(--coral);}
-  .del-btn{border:none; background:transparent; color:var(--ink-faint); font-size:17px; line-height:1; padding:4px 2px;}
+  .edit-btn,.del-btn{border:none; background:transparent; color:var(--ink-faint); font-size:15px; line-height:1; padding:4px 2px;}
+  .edit-btn:hover{color:var(--mint);}
+  .del-btn:hover{color:var(--coral);}
+  .entry-actions{display:flex;align-items:center;gap:2px;}
   .empty{text-align:center; color:var(--ink-faint); font-size:13px; padding:24px 0;}
 </style>
 </head>
@@ -356,8 +371,45 @@
         <input type="number" id="amountInput" placeholder="0" inputmode="decimal" min="0" step="0.01">
       </div>
     </div>
-    <p class="error-msg" id="errorMsg">กรอกรายการและจำนวนเงินให้ครบก่อนบันทึก</p>
+    <div class="field">
+      <label for="dateInput">วันที่</label>
+      <input type="date" id="dateInput">
+    </div>
+    <p class="error-msg" id="errorMsg">กรอกรายการ จำนวนเงิน และวันที่ให้ครบก่อนบันทึก</p>
     <button class="add-btn" id="addBtn">บันทึกรายการ</button>
+  </div>
+
+  <div class="card">
+    <p class="card-title">สำรองข้อมูล</p>
+    <div class="type-toggle">
+      <button type="button" class="type-btn" id="exportBtn">ส่งออก JSON</button>
+      <button type="button" class="type-btn" id="importBtn">นำเข้า JSON</button>
+    </div>
+    <input type="file" id="importFile" accept=".json,application/json" style="display:none">
+  </div>
+
+  <div class="card">
+    <p class="card-title">สรุปช่วงเวลา</p>
+    <div class="row2">
+      <div class="field">
+        <label for="summaryFrom">จากวันที่</label>
+        <input type="date" id="summaryFrom">
+      </div>
+      <div class="field">
+        <label for="summaryTo">ถึงวันที่</label>
+        <input type="date" id="summaryTo">
+      </div>
+    </div>
+    <div class="pill-row" style="margin-bottom:0;">
+      <div class="pill">
+        <p class="pill-label">รายรับ</p>
+        <p class="pill-value income mono" id="periodIncome">0</p>
+      </div>
+      <div class="pill">
+        <p class="pill-label">รายจ่าย</p>
+        <p class="pill-value expense mono" id="periodExpense">0</p>
+      </div>
+    </div>
   </div>
 
   <div class="list-head">
@@ -376,8 +428,11 @@ let entries = [];
 let currentType = 'income';
 let currentFilter = 'all';
 let salesTarget = null;
+let salesView = 'today';
+let editingId = null;
 const STORAGE_KEY = 'food-tracker.entries.v1';
 const TARGET_KEY = 'food-tracker.salesTarget.v1';
+const VIEW_KEY = 'food-tracker.salesView.v1';
 const SALES_CATEGORY = 'รายได้จากการขาย';
 
 const seedEntries = [
@@ -405,6 +460,33 @@ function escapeHtml(str){
   return div.innerHTML;
 }
 
+function isoDateFromThaiLabel(label){
+  const parts = String(label).split(/\s+/);
+  if(parts.length !== 3) return '';
+  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  const month = months.indexOf(parts[1]);
+  if(month < 0) return '';
+  return `${Number(parts[2]) - 543}-${String(month + 1).padStart(2, '0')}-${String(parts[0]).padStart(2, '0')}`;
+}
+
+function thaiLabelFromISO(value){
+  if(!value) return '';
+  const d = new Date(value + 'T00:00:00');
+  if(Number.isNaN(d.getTime())) return '';
+  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return d.getDate() + ' ' + months[d.getMonth()] + ' ' + (d.getFullYear() + 543);
+}
+
+function getTodayISO(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+function dateValueForEntry(e){
+  if(e.isoDate) return e.isoDate;
+  return isoDateFromThaiLabel(e.date);
+}
+
 function validEntries(value){
   if(!Array.isArray(value)) return null;
   return value.filter(e =>
@@ -417,6 +499,7 @@ function validEntries(value){
   ).map(e => ({
     id: String(e.id || `${Date.now()}-${Math.random()}`),
     date: e.date,
+    isoDate: typeof e.isoDate === 'string' ? e.isoDate : isoDateFromThaiLabel(e.date),
     item: e.item,
     category: e.category,
     type: e.type,
@@ -425,9 +508,7 @@ function validEntries(value){
 }
 
 function todayLabel(){
-  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-  const d = new Date();
-  return d.getDate() + ' ' + months[d.getMonth()] + ' ' + (d.getFullYear() + 543);
+  return thaiLabelFromISO(getTodayISO());
 }
 
 function setType(type){
@@ -469,33 +550,61 @@ function renderRing(pct){
     </svg>`;
 }
 
+function setSalesView(view){
+  salesView = view;
+  try{ localStorage.setItem(VIEW_KEY, view); }catch(err){ console.error('View save failed:', err); }
+  renderSalesBlock();
+}
+
 function renderSalesBlock(){
   const block = document.getElementById('salesBlock');
-  const sales = entries
+  const todayISO = getTodayISO();
+  const todaySales = entries
+    .filter(e => e.type === 'income' && e.category === SALES_CATEGORY && dateValueForEntry(e) === todayISO)
+    .reduce((sum, e) => sum + Number(e.amount), 0);
+  const allSales = entries
     .filter(e => e.type === 'income' && e.category === SALES_CATEGORY)
     .reduce((sum, e) => sum + Number(e.amount), 0);
+  const sales = salesView === 'today' ? todaySales : allSales;
+
+  const toggleHtml = `
+    <div class="view-toggle">
+      <button class="view-tab${salesView === 'today' ? ' active' : ''}" data-view="today">วันนี้</button>
+      <button class="view-tab${salesView === 'all' ? ' active' : ''}" data-view="all">ทั้งหมด</button>
+    </div>`;
 
   if(salesTarget === null || salesTarget <= 0){
     block.innerHTML = `
-      <div class="sales-empty">
-        ยังไม่ได้ตั้งเป้าหมายยอดขาย<br>
-        <button id="setTargetPrompt">ตั้งเป้าหมายตอนนี้</button>
+      <div class="sales-col">
+        ${toggleHtml}
+        <div class="sales-empty">
+          ยังไม่ได้ตั้งเป้าหมายยอดขาย<br>
+          <button id="setTargetPrompt">ตั้งเป้าหมายตอนนี้</button>
+        </div>
       </div>`;
     document.getElementById('setTargetPrompt').addEventListener('click', openSettings);
-    return;
+  } else {
+    const pct = (sales / salesTarget) * 100;
+    block.innerHTML = `
+      <div class="sales-col">
+        ${toggleHtml}
+        <div class="sales-row">
+          <div class="ring-wrap">
+            ${renderRing(pct)}
+            <div class="ring-pct mono">${Math.round(Math.min(pct, 100))}%</div>
+          </div>
+          <div class="sales-info">
+            <p class="sales-label">ยอดขาย${salesView === 'today' ? 'วันนี้' : 'สะสม'}</p>
+            <p class="sales-value mono">${formatBaht(sales)}</p>
+            <p class="sales-target mono">เป้าหมาย ${formatBaht(salesTarget)} บาท</p>
+          </div>
+        </div>
+      </div>`;
   }
 
-  const pct = (sales / salesTarget) * 100;
-  block.innerHTML = `
-    <div class="ring-wrap">
-      ${renderRing(pct)}
-      <div class="ring-pct mono">${Math.round(Math.min(pct, 100))}%</div>
-    </div>
-    <div class="sales-info">
-      <p class="sales-label">ยอดขาย</p>
-      <p class="sales-value mono">${formatBaht(sales)}</p>
-      <p class="sales-target mono">เป้าหมาย ${formatBaht(salesTarget)} บาท</p>
-    </div>`;
+  block.querySelectorAll('.view-tab').forEach(btn => {
+    btn.addEventListener('click', () => setSalesView(btn.getAttribute('data-view')));
+  });
 }
 
 function renderList(){
@@ -516,13 +625,19 @@ function renderList(){
       </div>
       <div class="entry-right">
         <span class="entry-amount ${e.type}">${e.type === 'expense' ? '-' : '+'}${formatBaht(e.amount)}</span>
-        <button class="del-btn" data-id="${escapeHtml(e.id)}" aria-label="ลบรายการ">&#10005;</button>
+        <div class="entry-actions">
+          <button class="edit-btn" data-id="${escapeHtml(e.id)}" aria-label="แก้ไขรายการ">&#9998;</button>
+          <button class="del-btn" data-id="${escapeHtml(e.id)}" aria-label="ลบรายการ">&#10005;</button>
+        </div>
       </div>
     `;
     list.appendChild(row);
   });
   list.querySelectorAll('.del-btn').forEach(btn => {
     btn.addEventListener('click', () => deleteEntry(btn.getAttribute('data-id')));
+  });
+  list.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => editEntry(btn.getAttribute('data-id')));
   });
 }
 
@@ -537,6 +652,7 @@ function render(){
   document.getElementById('netValue').textContent = formatBaht(income - expense) + ' บาท';
   renderSalesBlock();
   renderList();
+  updatePeriodSummary();
 }
 
 function saveEntries(){
@@ -585,6 +701,15 @@ function saveTarget(value){
   }
 }
 
+function loadSalesView(){
+  try{
+    const saved = localStorage.getItem(VIEW_KEY);
+    salesView = (saved === 'today' || saved === 'all') ? saved : 'today';
+  }catch(err){
+    salesView = 'today';
+  }
+}
+
 function openSettings(){
   const panel = document.getElementById('settingsPanel');
   panel.classList.add('open');
@@ -602,41 +727,137 @@ function toggleSettings(){
   }
 }
 
-function deleteEntry(id){
-  entries = entries.filter(e => e.id !== String(id));
-  saveEntries();
-  render();
+function setDefaultDate(){
+  const el = document.getElementById('dateInput');
+  if(el && !el.value) el.value = getTodayISO();
+}
+
+function editEntry(id){
+  const e = entries.find(x => x.id === String(id));
+  if(!e) return;
+  editingId = e.id;
+  setType(e.type);
+  document.getElementById('itemInput').value = e.item;
+  document.getElementById('categoryInput').value = e.category;
+  document.getElementById('amountInput').value = e.amount;
+  document.getElementById('dateInput').value = dateValueForEntry(e);
+  document.getElementById('addBtn').textContent = 'บันทึกการแก้ไข';
+  document.getElementById('errorMsg').style.display = 'none';
+  document.getElementById('itemInput').focus();
+  document.getElementById('itemInput').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function resetForm(){
+  editingId = null;
+  document.getElementById('itemInput').value = '';
+  document.getElementById('amountInput').value = '';
+  document.getElementById('addBtn').textContent = 'บันทึกรายการ';
+  setDefaultDate();
+}
+
+function updatePeriodSummary(){
+  const from = document.getElementById('summaryFrom').value;
+  const to = document.getElementById('summaryTo').value;
+  let list = entries;
+  if(from) list = list.filter(e => dateValueForEntry(e) >= from);
+  if(to) list = list.filter(e => dateValueForEntry(e) <= to);
+  const income = list.filter(e => e.type === 'income').reduce((s, e) => s + Number(e.amount), 0);
+  const expense = list.filter(e => e.type === 'expense').reduce((s, e) => s + Number(e.amount), 0);
+  document.getElementById('periodIncome').textContent = formatBaht(income);
+  document.getElementById('periodExpense').textContent = formatBaht(expense);
+}
+
+function exportData(){
+  const payload = {
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    entries,
+    salesTarget
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'food-tracker-backup.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(file){
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const data = JSON.parse(reader.result);
+      const importedEntries = Array.isArray(data) ? data : data.entries;
+      const parsed = validEntries(importedEntries);
+      if(!parsed) throw new Error('รูปแบบข้อมูลไม่ถูกต้อง');
+      entries = parsed;
+      if(data && !Array.isArray(data) && Number.isFinite(Number(data.salesTarget)) && Number(data.salesTarget) > 0){
+        salesTarget = Number(data.salesTarget);
+        localStorage.setItem(TARGET_KEY, String(salesTarget));
+      }
+      saveEntries();
+      render();
+      alert('นำเข้าข้อมูลสำเร็จ');
+    }catch(err){
+      alert('นำเข้าข้อมูลไม่สำเร็จ: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
 }
 
 function addEntry(){
   const itemInput = document.getElementById('itemInput');
   const amountInput = document.getElementById('amountInput');
   const categoryInput = document.getElementById('categoryInput');
+  const dateInput = document.getElementById('dateInput');
   const errorMsg = document.getElementById('errorMsg');
 
   const item = itemInput.value.trim();
   const amount = parseFloat(amountInput.value);
+  const dateValue = dateInput.value;
 
-  if(!item || isNaN(amount) || amount <= 0){
+  if(!item || isNaN(amount) || amount <= 0 || !dateValue){
     errorMsg.style.display = 'block';
     return;
   }
   errorMsg.style.display = 'none';
 
-  entries.push({
-    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    date: todayLabel(),
-    item: item,
-    category: categoryInput.value,
-    type: currentType,
-    amount: amount
-  });
+  if(editingId){
+    const e = entries.find(x => x.id === editingId);
+    if(e){
+      e.date = thaiLabelFromISO(dateValue);
+      e.isoDate = dateValue;
+      e.item = item;
+      e.category = categoryInput.value;
+      e.type = currentType;
+      e.amount = amount;
+    }
+  } else {
+    entries.push({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      date: thaiLabelFromISO(dateValue),
+      isoDate: dateValue,
+      item,
+      category: categoryInput.value,
+      type: currentType,
+      amount
+    });
+  }
+
   saveEntries();
   render();
-
-  itemInput.value = '';
-  amountInput.value = '';
+  resetForm();
   itemInput.focus();
+}
+
+function deleteEntry(id){
+  const e = entries.find(x => x.id === String(id));
+  if(!e) return;
+  if(!confirm(`ต้องการลบรายการ "${e.item}" จำนวน ${formatBaht(e.amount)} บาทหรือไม่?`)) return;
+  entries = entries.filter(x => x.id !== String(id));
+  saveEntries();
+  render();
 }
 
 document.getElementById('btnIncome').addEventListener('click', () => setType('income'));
@@ -659,14 +880,28 @@ document.getElementById('itemInput').addEventListener('input', () => {
 document.getElementById('amountInput').addEventListener('input', () => {
   document.getElementById('errorMsg').style.display = 'none';
 });
+document.getElementById('dateInput').addEventListener('input', () => {
+  document.getElementById('errorMsg').style.display = 'none';
+});
+document.getElementById('summaryFrom').addEventListener('change', updatePeriodSummary);
+document.getElementById('summaryTo').addEventListener('change', updatePeriodSummary);
+document.getElementById('exportBtn').addEventListener('click', exportData);
+document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+document.getElementById('importFile').addEventListener('change', e => {
+  if(e.target.files[0]) importData(e.target.files[0]);
+  e.target.value = '';
+});
 window.addEventListener('storage', event => {
   if(event.key === STORAGE_KEY){ loadEntries(); render(); }
   if(event.key === TARGET_KEY){ loadTarget(); renderSalesBlock(); }
+  if(event.key === VIEW_KEY){ loadSalesView(); renderSalesBlock(); }
 });
 
 setType('income');
 loadEntries();
 loadTarget();
+loadSalesView();
+setDefaultDate();
 render();
 </script>
 </body>
