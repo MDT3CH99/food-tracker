@@ -372,10 +372,11 @@
     <div class="type-toggle">
       <button type="button" class="type-btn" id="exportBtn">ดาวน์โหลด JSON</button>
       <button type="button" class="type-btn" id="copyExportBtn">คัดลอกข้อความ</button>
+      <button type="button" class="type-btn" id="csvExportBtn">ส่งออก CSV</button>
     </div>
     <textarea id="exportText" readonly aria-label="ข้อมูล JSON" style="display:none;width:100%;min-height:150px;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--panel-2);color:var(--ink);font-family:'JetBrains Mono',monospace;font-size:11px;resize:vertical;"></textarea>
     <p id="backupStatus" style="font-size:11px;color:var(--ink-soft);margin:8px 0 0;"></p>
-    <div class="type-toggle" style="display:none">
+    <div class="type-toggle">
       <button type="button" class="type-btn" id="importBtn">นำเข้า JSON</button>
     </div>
     <input type="file" id="importFile" accept=".json,application/json" style="display:none">
@@ -647,8 +648,8 @@ const seedEntries = [
     "date": "8 ก.ย. 2569",
     "isoDate": "2026-09-08",
     "item": "ที่ขายได้",
-    "category": "วัตถุดิบ",
-    "type": "expense",
+    "category": "รายได้จากการขาย",
+    "type": "income",
     "amount": 140
   },
   {
@@ -656,8 +657,8 @@ const seedEntries = [
     "date": "8 ก.ย. 2569",
     "isoDate": "2026-09-08",
     "item": "ที่ขายได้",
-    "category": "วัตถุดิบ",
-    "type": "expense",
+    "category": "รายได้จากการขาย",
+    "type": "income",
     "amount": 50
   },
   {
@@ -665,8 +666,8 @@ const seedEntries = [
     "date": "8 ก.ย. 2569",
     "isoDate": "2026-09-08",
     "item": "ที่ขายได้",
-    "category": "วัตถุดิบ",
-    "type": "expense",
+    "category": "รายได้จากการขาย",
+    "type": "income",
     "amount": 140
   },
   {
@@ -875,6 +876,159 @@ const seedEntries = [
     "category": "รายได้จากการขาย",
     "type": "income",
     "amount": 60
+  },
+  {
+    "id": "1788860882153-dtqluj",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "กุนเชียง",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 200
+  },
+  {
+    "id": "1788890089494-h3lejs",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "แก๊ส",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 325
+  },
+  {
+    "id": "1788890128343-kng9sa",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ที่ขายได้",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 60
+  },
+  {
+    "id": "1788914609692-o2o6aq",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "โครงไก่",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 100
+  },
+  {
+    "id": "1788914614851-9kj2w9",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ผัก",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 140
+  },
+  {
+    "id": "1788914621405-u0pg6h",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "เครื่องปรุง",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 144
+  },
+  {
+    "id": "1788914639008-0arh2u",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "กล่อง",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 140
+  },
+  {
+    "id": "1788916077790-wj8447",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ป้าย",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 30
+  },
+  {
+    "id": "1788927715842-6j5uea",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ข้าว",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 50
+  },
+  {
+    "id": "1788934456517-8wly8b",
+    "date": "8 ก.ย. 2569",
+    "isoDate": "2026-09-08",
+    "item": "ถุง",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 74
+  },
+  {
+    "id": "1788936193004-qtutnd",
+    "date": "9 ก.ย. 2569",
+    "isoDate": "2026-09-09",
+    "item": "รวมการขาย",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 3500
+  },
+  {
+    "id": "1788936491165-pgnwtd",
+    "date": "9 ก.ย. 2569",
+    "isoDate": "2026-09-09",
+    "item": "ทุนวันที่ 10",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 1000
+  },
+  {
+    "id": "1788995881654-rs9oz6",
+    "date": "10 ก.ย. 2569",
+    "isoDate": "2026-09-10",
+    "item": "ทุน",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 300
+  },
+  {
+    "id": "1789021346715-5erc54",
+    "date": "10 ก.ย. 2569",
+    "isoDate": "2026-09-10",
+    "item": "ป้า",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 80
+  },
+  {
+    "id": "1789021383268-emvp8s",
+    "date": "10 ก.ย. 2569",
+    "isoDate": "2026-09-10",
+    "item": "งา",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 60
+  },
+  {
+    "id": "1789031003184-6uh984",
+    "date": "10 ก.ย. 2569",
+    "isoDate": "2026-09-10",
+    "item": "รวมการขาย",
+    "category": "รายได้จากการขาย",
+    "type": "income",
+    "amount": 2600
+  },
+  {
+    "id": "1789031945772-9z3pn0",
+    "date": "11 ก.ย. 2569",
+    "isoDate": "2026-09-11",
+    "item": "ทุน-11",
+    "category": "วัตถุดิบ",
+    "type": "expense",
+    "amount": 2000
   }
 ];
 
@@ -1061,24 +1215,6 @@ function loadEntries(){
   }
 }
 
-
-const DATA_IMPORT_VERSION = '2026-09-08-latest-backup-v1';
-
-function applyLatestBackupOnce(){
-  try{
-    if(localStorage.getItem('food-tracker.dataVersion') !== DATA_IMPORT_VERSION){
-      entries = seedEntries.map(e => ({...e}));
-      saveEntries();
-      if(Number.isFinite(Number(salesTarget)) && Number(salesTarget) > 0){
-        localStorage.setItem(TARGET_KEY, String(salesTarget));
-      }
-      localStorage.setItem('food-tracker.dataVersion', DATA_IMPORT_VERSION);
-    }
-  }catch(err){
-    console.error('Latest backup migration failed:', err);
-  }
-}
-
 function loadTarget(){
   try{
     const saved = localStorage.getItem(TARGET_KEY);
@@ -1117,6 +1253,7 @@ function toggleSettings(){
 
 
 
+const APP_SCHEMA_VERSION = '2026-09-11-v5-safe';
 let editingId = null;
 
 function isoDateFromThaiLabel(label){
@@ -1188,7 +1325,7 @@ function updatePeriodSummary(){
   document.getElementById('periodExpense').textContent = formatBaht(expense);
 }
 
-function buildBackupData(){ return {version:2, exportedAt:new Date().toISOString(), entries, salesTarget}; }
+function buildBackupData(){ return {version:2, appSchema:APP_SCHEMA_VERSION, exportedAt:new Date().toISOString(), entries, salesTarget}; }
 function buildBackupText(){ return JSON.stringify(buildBackupData(), null, 2); }
 function exportData(){
   try{ const blob=new Blob([buildBackupText()],{type:'application/json;charset=utf-8'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='food-tracker-backup.json'; a.style.display='none'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000); document.getElementById('backupStatus').textContent='ส่งออกข้อมูลแล้ว หากไม่พบไฟล์ ให้ใช้ “คัดลอกข้อความ”'; }
@@ -1198,6 +1335,34 @@ async function copyExportText(){
   const text=buildBackupText(), box=document.getElementById('exportText'), status=document.getElementById('backupStatus'); box.value=text; box.style.display='block';
   try{ if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(text); status.textContent='คัดลอก JSON แล้ว'; return; } }catch(e){}
   box.focus(); box.select(); try{ const ok=document.execCommand('copy'); status.textContent=ok?'คัดลอก JSON แล้ว':'คัดลอกอัตโนมัติไม่ได้ ให้กดค้างที่ข้อความแล้วเลือกคัดลอก'; }catch(e){ status.textContent='คัดลอกอัตโนมัติไม่ได้ ให้กดค้างที่ข้อความแล้วเลือกคัดลอก'; }
+}
+
+
+function csvCell(value){
+  return '"' + String(value ?? '').replace(/"/g, '""') + '"';
+}
+function exportCSV(){
+  const rows = [['วันที่','รายการ','หมวดหมู่','ประเภท','จำนวนเงิน']];
+  entries.forEach(e => rows.push([
+    e.isoDate || dateValueForEntry(e) || '',
+    e.item,
+    e.category,
+    e.type === 'income' ? 'รายรับ' : 'รายจ่าย',
+    Number(e.amount)
+  ]));
+  const csv = '\uFEFF' + rows.map(r => r.map(csvCell).join(',')).join('\r\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'food-tracker.csv';
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  document.getElementById('backupStatus').textContent =
+    'สร้างไฟล์ CSV แล้ว หากดาวน์โหลดไม่ได้ ให้ใช้ “คัดลอกข้อความ”';
 }
 
 function importData(file){
@@ -1304,6 +1469,7 @@ document.getElementById('summaryFrom').addEventListener('change', updatePeriodSu
 document.getElementById('summaryTo').addEventListener('change', updatePeriodSummary);
 document.getElementById('exportBtn').addEventListener('click', exportData);
 document.getElementById('copyExportBtn').addEventListener('click', copyExportText);
+document.getElementById('csvExportBtn').addEventListener('click', exportCSV);
 document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
 document.getElementById('importFile').addEventListener('change', e => {
   if(e.target.files[0]) importData(e.target.files[0]);
@@ -1315,9 +1481,6 @@ window.addEventListener('storage', event => {
 });
 
 setType('income');
-loadEntries();
-loadTarget();
-applyLatestBackupOnce();
 loadEntries();
 loadTarget();
 setDefaultDate();
