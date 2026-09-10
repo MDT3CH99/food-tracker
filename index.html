@@ -53,7 +53,7 @@
     justify-content:space-between;
     margin-bottom:14px;
   }
-  .topbar-text h1{
+  .topbar-text h2{
     font-size:18px;
     font-weight:700;
     margin:0 0 2px;
@@ -255,6 +255,20 @@
     margin-top:2px;
   }
   .add-btn:active{opacity:0.85;}
+  .cancel-btn{
+    width:100%;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:9px 0;
+    font-family:'Sarabun',sans-serif;
+    font-size:14px;
+    font-weight:600;
+    background:transparent;
+    color:var(--ink-soft);
+    margin-top:8px;
+    display:none;
+  }
+  .cancel-btn.visible{display:block;}
   .error-msg{font-size:12px; color:var(--coral); margin:-4px 0 8px; display:none;}
 
   .list-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; padding:0 2px;}
@@ -299,6 +313,72 @@
   .del-btn:hover{color:var(--coral);}
   .entry-actions{display:flex;align-items:center;gap:2px;}
   .empty{text-align:center; color:var(--ink-faint); font-size:13px; padding:24px 0;}
+
+  body{
+    min-height:100vh;
+    background:#06090D;
+  }
+  button,
+  input,
+  select,
+  textarea{font:inherit;}
+  button{cursor:pointer; transition:background .18s ease, border-color .18s ease, color .18s ease, transform .18s ease, box-shadow .18s ease;}
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible{outline:2px solid var(--mint); outline-offset:2px;}
+  .wrap{
+    width:100%;
+    max-width:640px;
+    min-height:100vh;
+    padding:24px 20px 48px;
+    background:
+      radial-gradient(circle at 0 0, rgba(61,232,160,.10), transparent 32%),
+      radial-gradient(circle at 100% 30%, rgba(245,196,82,.07), transparent 30%),
+      linear-gradient(180deg, #0B1118 0%, #080C12 46%, #070A0F 100%);
+    box-shadow:0 0 80px rgba(0,0,0,.35);
+  }
+  .topbar{margin-bottom:18px;}
+  .topbar-text h2{font-size:21px; letter-spacing:0;}
+  .topbar-text .sub{color:#91A19F; letter-spacing:1.6px;}
+  .icon-btn{width:42px; height:42px; border-radius:13px; background:rgba(18,26,34,.88); box-shadow:0 8px 20px rgba(0,0,0,.16);}
+  .icon-btn:hover{color:var(--mint); border-color:rgba(61,232,160,.4); transform:translateY(-1px);}
+  .dash{padding:22px; border-color:#263541; box-shadow:0 16px 36px rgba(0,0,0,.22);}
+  .net-label,.card-title,.list-title{color:#91A19F;}
+  .net-value{font-size:34px; letter-spacing:-.4px;}
+  .pill-row{gap:8px;}
+  .pill{border-color:#25323D; background:rgba(18,26,34,.78);}
+  .pill-label{color:#8B9B9A;}
+  .pill-value{font-size:16px;}
+  .sales-target{color:#A4B2B0 !important;}
+  .card{padding:18px; border-color:#24323D; background:rgba(14,20,27,.9); box-shadow:0 12px 26px rgba(0,0,0,.14);}
+  .card-title{font-size:12px; margin-bottom:14px; letter-spacing:1.2px;}
+  .type-toggle{gap:9px;}
+  .type-btn{border-color:#263641; background:#141E27; color:#A1AFAD;}
+  .type-btn:hover{border-color:#3C5660; color:var(--ink); background:#18252E;}
+  .type-btn.active-income,.type-btn.active-expense{box-shadow:0 0 0 1px rgba(255,255,255,.04) inset;}
+  .field label{color:#91A19F;}
+  .field input,.field select,.settings-row input{border-color:#2A3A45; background:#111B24;}
+  .field input::placeholder,.settings-row input::placeholder{color:#687B7F;}
+  .field input:hover,.field select:hover,.settings-row input:hover{border-color:#3B535C;}
+  .add-btn{box-shadow:0 8px 18px rgba(61,232,160,.18);}
+  .add-btn:hover{background:#5AF0AE; transform:translateY(-1px); box-shadow:0 10px 22px rgba(61,232,160,.26);}
+  .cancel-btn:hover{border-color:#60747A; color:var(--ink); background:#17222A;}
+  .filter-tabs{background:#111B24; border-color:#263641;}
+  .filter-tab{color:#91A19F;}
+  .filter-tab:hover{color:var(--ink);}
+  .filter-tab.active{box-shadow:0 3px 8px rgba(0,0,0,.18);}
+  .entry{border-color:#24323D; background:rgba(14,20,27,.82); transition:transform .18s ease, border-color .18s ease, background .18s ease;}
+  .entry:hover{transform:translateX(2px); border-color:#38505A; background:#111B24;}
+  .entry-meta{color:#91A19F;}
+  .edit-btn,.del-btn{min-width:28px; min-height:28px; border-radius:7px;}
+  .edit-btn:hover{background:var(--mint-dim);}
+  .del-btn:hover{background:var(--coral-dim);}
+  @media (max-width:520px){
+    .wrap{padding:18px 14px 36px;}
+    .dash,.card{padding:16px;}
+    .net-value{font-size:30px;}
+  }
 </style>
 </head>
 <body>
@@ -307,7 +387,7 @@
 
   <div class="topbar">
     <div class="topbar-text">
-      <h1>บันทึกรายรับ-รายจ่าย</h1>
+      <h2>บันทึกรายรับ-รายจ่าย</h2>
       <p class="sub">Food stall ledger</p>
     </div>
     <button class="icon-btn" id="settingsBtn" aria-label="ตั้งค่าเป้าหมายยอดขาย">
@@ -324,18 +404,23 @@
   </div>
 
   <div class="dash">
-    <p class="net-label">คงเหลือสุทธิ</p>
+    <p class="net-label">เงินคงเหลือ</p>
     <p class="net-value mono" id="netValue">0 บาท</p>
     <div class="pill-row">
       <div class="pill">
-        <p class="pill-label">รายรับรวม</p>
-        <p class="pill-value income mono" id="totalIncome">0</p>
+        <p class="pill-label">ยอดขาย</p>
+        <p class="pill-value income mono" id="totalSales">0</p>
       </div>
       <div class="pill">
         <p class="pill-label">รายจ่ายรวม</p>
         <p class="pill-value expense mono" id="totalExpense">0</p>
       </div>
+      <div class="pill">
+        <p class="pill-label">เงินกู้ยืม</p>
+        <p class="pill-value mono" id="totalLoan">0</p>
+      </div>
     </div>
+    <p class="sales-target mono" id="salesProfit">ผลต่างยอดขาย - รายจ่าย 0 บาท</p>
     <div class="sales-block" id="salesBlock"></div>
   </div>
 
@@ -365,6 +450,7 @@
     </div>
     <p class="error-msg" id="errorMsg">กรอกรายการ จำนวนเงิน และวันที่ให้ครบก่อนบันทึก</p>
     <button class="add-btn" id="addBtn">บันทึกรายการ</button>
+    <button class="cancel-btn" id="cancelEditBtn" type="button">ยกเลิกการแก้ไข</button>
   </div>
 
   <div class="card">
@@ -396,12 +482,16 @@
     </div>
     <div class="pill-row" style="margin-bottom:0;">
       <div class="pill">
-        <p class="pill-label">รายรับ</p>
-        <p class="pill-value income mono" id="periodIncome">0</p>
+        <p class="pill-label">ยอดขาย</p>
+        <p class="pill-value income mono" id="periodSales">0</p>
       </div>
       <div class="pill">
         <p class="pill-label">รายจ่าย</p>
         <p class="pill-value expense mono" id="periodExpense">0</p>
+      </div>
+      <div class="pill">
+        <p class="pill-label">เงินกู้ยืม</p>
+        <p class="pill-value mono" id="periodLoan">0</p>
       </div>
     </div>
   </div>
@@ -1046,16 +1136,16 @@ function escapeHtml(str){
   return div.innerHTML;
 }
 
-function validEntries(value){
-  if(!Array.isArray(value)) return null;
-  return value.filter(e =>
-    e &&
-    (e.type === 'income' || e.type === 'expense') &&
-    typeof e.item === 'string' &&
-    typeof e.category === 'string' &&
-    typeof e.date === 'string' &&
-    Number.isFinite(Number(e.amount)) && Number(e.amount) > 0
-  ).map(e => ({
+function normalizeEntry(e){
+  if(!e ||
+    (e.type !== 'income' && e.type !== 'expense') ||
+    typeof e.item !== 'string' ||
+    typeof e.category !== 'string' ||
+    typeof e.date !== 'string' ||
+    !Number.isFinite(Number(e.amount)) || Number(e.amount) <= 0){
+    return null;
+  }
+  return {
     id: String(e.id || `${Date.now()}-${Math.random()}`),
     date: e.date,
     isoDate: typeof e.isoDate === 'string' ? e.isoDate : isoDateFromThaiLabel(e.date),
@@ -1063,7 +1153,24 @@ function validEntries(value){
     category: e.category,
     type: e.type,
     amount: Number(e.amount)
-  }));
+  };
+}
+
+function inspectEntries(value){
+  if(!Array.isArray(value)) return null;
+  const entries = [];
+  let rejected = 0;
+  value.forEach(item => {
+    const normalized = normalizeEntry(item);
+    if(normalized) entries.push(normalized);
+    else rejected += 1;
+  });
+  return {entries, rejected};
+}
+
+function validEntries(value){
+  const inspected = inspectEntries(value);
+  return inspected ? inspected.entries : null;
 }
 
 function todayLabel(){
@@ -1072,7 +1179,7 @@ function todayLabel(){
   return d.getDate() + ' ' + months[d.getMonth()] + ' ' + (d.getFullYear() + 543);
 }
 
-function setType(type){
+function setType(type, preferredCategory){
   currentType = type;
   document.getElementById('btnIncome').className = 'type-btn' + (type === 'income' ? ' active-income' : '');
   document.getElementById('btnExpense').className = 'type-btn' + (type === 'expense' ? ' active-expense' : '');
@@ -1081,6 +1188,7 @@ function setType(type){
   const opts = type === 'income'
     ? [SALES_CATEGORY, 'เงินกู้ยืม', 'รายรับอื่นๆ']
     : ['วัตถุดิบ', 'ค่าเช่า', 'ค่าน้ำ-ไฟ', 'ค่าใช้จ่ายอื่นๆ'];
+  if(preferredCategory && !opts.includes(preferredCategory)) opts.push(preferredCategory);
   opts.forEach(o => {
     const el = document.createElement('option');
     el.value = o;
@@ -1128,15 +1236,16 @@ function renderSalesBlock(){
   }
 
   const pct = (sales / salesTarget) * 100;
+  const overTarget = sales - salesTarget;
   block.innerHTML = `
     <div class="ring-wrap">
       ${renderRing(pct)}
-      <div class="ring-pct mono">${Math.round(Math.min(pct, 100))}%</div>
+      <div class="ring-pct mono">${Math.round(pct)}%</div>
     </div>
     <div class="sales-info">
       <p class="sales-label">ยอดขาย</p>
       <p class="sales-value mono">${formatBaht(sales)}</p>
-      <p class="sales-target mono">เป้าหมาย ${formatBaht(salesTarget)} บาท</p>
+      <p class="sales-target mono">เป้าหมาย ${formatBaht(salesTarget)} บาท${overTarget > 0 ? ` · เกิน ${formatBaht(overTarget)} บาท` : ''}</p>
     </div>`;
 }
 
@@ -1148,7 +1257,10 @@ function renderList(){
     list.innerHTML = '<div class="empty">ไม่มีรายการในหมวดนี้</div>';
     return;
   }
-  filtered.slice().reverse().forEach(e => {
+  filtered.map((e, index) => ({e, index})).sort((a, b) => {
+    const dateOrder = dateValueForEntry(b.e).localeCompare(dateValueForEntry(a.e));
+    return dateOrder || b.index - a.index;
+  }).forEach(({e}) => {
     const row = document.createElement('div');
     row.className = 'entry ' + e.type;
     row.innerHTML = `
@@ -1175,14 +1287,19 @@ function renderList(){
 }
 
 function render(){
-  let income = 0, expense = 0;
+  let income = 0, sales = 0, loan = 0, expense = 0;
   entries.forEach(e => {
-    if(e.type === 'income') income += Number(e.amount);
-    else expense += Number(e.amount);
+    if(e.type === 'income'){
+      income += Number(e.amount);
+      if(e.category === SALES_CATEGORY) sales += Number(e.amount);
+      if(e.category === 'เงินกู้ยืม') loan += Number(e.amount);
+    } else expense += Number(e.amount);
   });
-  document.getElementById('totalIncome').textContent = formatBaht(income);
+  document.getElementById('totalSales').textContent = formatBaht(sales);
   document.getElementById('totalExpense').textContent = formatBaht(expense);
+  document.getElementById('totalLoan').textContent = formatBaht(loan);
   document.getElementById('netValue').textContent = formatBaht(income - expense) + ' บาท';
+  document.getElementById('salesProfit').textContent = 'ผลต่างยอดขาย - รายจ่าย ' + formatBaht(sales - expense) + ' บาท';
   renderSalesBlock();
   renderList();
   updatePeriodSummary();
@@ -1294,12 +1411,13 @@ function editEntry(id){
   const e = entries.find(x => x.id === String(id));
   if(!e) return;
   editingId = e.id;
-  setType(e.type);
+  setType(e.type, e.category);
   document.getElementById('itemInput').value = e.item;
   document.getElementById('categoryInput').value = e.category;
   document.getElementById('amountInput').value = e.amount;
   document.getElementById('dateInput').value = dateValueForEntry(e);
   document.getElementById('addBtn').textContent = 'บันทึกการแก้ไข';
+  document.getElementById('cancelEditBtn').classList.add('visible');
   document.getElementById('errorMsg').style.display = 'none';
   document.getElementById('itemInput').focus();
   document.getElementById('itemInput').scrollIntoView({behavior:'smooth', block:'center'});
@@ -1310,6 +1428,9 @@ function resetForm(){
   document.getElementById('itemInput').value = '';
   document.getElementById('amountInput').value = '';
   document.getElementById('addBtn').textContent = 'บันทึกรายการ';
+  document.getElementById('cancelEditBtn').classList.remove('visible');
+  document.getElementById('errorMsg').textContent = 'กรอกรายการ จำนวนเงิน และวันที่ให้ครบก่อนบันทึก';
+  document.getElementById('errorMsg').style.display = 'none';
   setDefaultDate();
 }
 
@@ -1319,10 +1440,12 @@ function updatePeriodSummary(){
   let list = entries;
   if(from) list = list.filter(e => dateValueForEntry(e) >= from);
   if(to) list = list.filter(e => dateValueForEntry(e) <= to);
-  const income = list.filter(e => e.type === 'income').reduce((s,e)=>s+Number(e.amount),0);
+  const sales = list.filter(e => e.type === 'income' && e.category === SALES_CATEGORY).reduce((s,e)=>s+Number(e.amount),0);
+  const loan = list.filter(e => e.type === 'income' && e.category === 'เงินกู้ยืม').reduce((s,e)=>s+Number(e.amount),0);
   const expense = list.filter(e => e.type === 'expense').reduce((s,e)=>s+Number(e.amount),0);
-  document.getElementById('periodIncome').textContent = formatBaht(income);
+  document.getElementById('periodSales').textContent = formatBaht(sales);
   document.getElementById('periodExpense').textContent = formatBaht(expense);
+  document.getElementById('periodLoan').textContent = formatBaht(loan);
 }
 
 function buildBackupData(){ return {version:2, appSchema:APP_SCHEMA_VERSION, exportedAt:new Date().toISOString(), entries, salesTarget}; }
@@ -1371,9 +1494,13 @@ function importData(file){
     try{
       const data = JSON.parse(reader.result);
       const importedEntries = Array.isArray(data) ? data : data.entries;
-      const parsed = validEntries(importedEntries);
-      if(!parsed) throw new Error('รูปแบบข้อมูลไม่ถูกต้อง');
-      entries = parsed;
+      const inspected = inspectEntries(importedEntries);
+      if(!inspected) throw new Error('รูปแบบข้อมูลไม่ถูกต้อง');
+      if(inspected.entries.length === 0) throw new Error('ไม่พบรายการที่ถูกต้องในไฟล์');
+      const rejectedMessage = inspected.rejected > 0
+        ? `\n\nมีรายการที่ไม่ผ่านการตรวจสอบ ${inspected.rejected} รายการ (เช่น จำนวนเงินเป็น 0 หรือข้อมูลไม่ครบ) และจะไม่ถูกนำเข้า` : '';
+      if(!confirm(`การนำเข้าจะเขียนทับรายการเดิมทั้งหมด มีรายการใหม่ ${inspected.entries.length} รายการ${rejectedMessage}\n\nต้องการดำเนินการต่อหรือไม่?`)) return;
+      entries = inspected.entries;
       if(data && !Array.isArray(data) && Number.isFinite(Number(data.salesTarget)) && Number(data.salesTarget) > 0){
         salesTarget = Number(data.salesTarget);
         localStorage.setItem(TARGET_KEY, String(salesTarget));
@@ -1407,14 +1534,18 @@ function addEntry(){
 
   if(editingId){
     const e = entries.find(x => x.id === editingId);
-    if(e){
-      e.date = thaiLabelFromISO(dateValue);
-      e.isoDate = dateValue;
-      e.item = item;
-      e.category = categoryInput.value;
-      e.type = currentType;
-      e.amount = amount;
+    if(!e){
+      resetForm();
+      errorMsg.textContent = 'รายการนี้ถูกลบไปแล้ว จึงไม่สามารถบันทึกการแก้ไขได้';
+      errorMsg.style.display = 'block';
+      return;
     }
+    e.date = thaiLabelFromISO(dateValue);
+    e.isoDate = dateValue;
+    e.item = item;
+    e.category = categoryInput.value;
+    e.type = currentType;
+    e.amount = amount;
   }else{
     entries.push({
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -1445,6 +1576,7 @@ function deleteEntry(id){
 document.getElementById('btnIncome').addEventListener('click', () => setType('income'));
 document.getElementById('btnExpense').addEventListener('click', () => setType('expense'));
 document.getElementById('addBtn').addEventListener('click', addEntry);
+document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
 document.getElementById('settingsBtn').addEventListener('click', toggleSettings);
 document.getElementById('saveTargetBtn').addEventListener('click', () => {
   const val = parseFloat(document.getElementById('targetInput').value);
