@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>รายรับรายจ่าย ร้านขายอาหาร</title>
+<meta name="theme-color" content="#0B1118">
+<meta name="description" content="แอปบันทึกรายรับรายจ่ายและติดตามเป้าหมายเงินคงเหลือสำหรับร้านขายอาหาร">
+<link rel="manifest" href="food-tracker.webmanifest">
+<link rel="icon" href="food-tracker-icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -26,6 +30,7 @@
   }
   *{box-sizing:border-box;}
   body{margin:0;}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
   .wrap{
     font-family:'Sarabun',sans-serif;
     background:
@@ -94,6 +99,7 @@
     margin-bottom:14px;
   }
   .settings-panel.open{display:block;}
+  .settings-panel .settings-backup{margin:14px 0 0;}
   .settings-panel .st-title{
     font-size:12px;
     color:var(--ink-soft);
@@ -313,6 +319,25 @@
   .del-btn:hover{color:var(--coral);}
   .entry-actions{display:flex;align-items:center;gap:2px;}
   .empty{text-align:center; color:var(--ink-faint); font-size:13px; padding:24px 0;}
+  .list-tools{display:flex; gap:8px; margin-bottom:10px;}
+  .search-input{flex:1; min-width:0;}
+  .search-input input{width:100%; padding:9px 11px; border:1px solid var(--line); border-radius:10px; background:var(--panel-2); color:var(--ink);}
+  .date-presets{display:flex; gap:6px; overflow-x:auto; padding-bottom:2px; margin-bottom:12px; scrollbar-width:none;}
+  .date-presets::-webkit-scrollbar{display:none;}
+  .date-preset{flex:0 0 auto; border:1px solid var(--line); border-radius:9px; padding:7px 10px; background:var(--panel-2); color:var(--ink-soft); font-size:12px;}
+  .date-preset.active{border-color:rgba(61,232,160,.5); background:var(--mint-dim); color:var(--mint);}
+  .undo-bar{display:none; align-items:center; justify-content:space-between; gap:10px; padding:9px 11px; margin-bottom:12px; border:1px solid rgba(245,196,82,.35); border-radius:10px; background:rgba(245,196,82,.09); color:var(--amber); font-size:12px;}
+  .undo-bar.visible{display:flex;}
+  .undo-btn{border:1px solid rgba(245,196,82,.45); border-radius:7px; padding:5px 10px; background:transparent; color:var(--amber); font-size:12px; font-weight:600;}
+  .app-modal{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(2,5,8,.72);}
+  .app-modal.open{display:flex;}
+  .app-modal-card{width:min(100%,420px);padding:20px;border:1px solid #334651;border-radius:14px;background:#101820;box-shadow:0 24px 60px rgba(0,0,0,.42);}
+  .app-modal-title{margin:0 0 8px;color:var(--ink);font-size:17px;font-weight:700;}
+  .app-modal-message{margin:0;white-space:pre-line;color:#B5C2C0;font-size:14px;line-height:1.55;}
+  .app-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;}
+  .app-modal-actions button{border:1px solid #334651;border-radius:9px;padding:8px 14px;background:#17232C;color:var(--ink-soft);font-family:'Sarabun',sans-serif;font-size:14px;font-weight:600;}
+  .app-modal-actions .primary{border-color:rgba(61,232,160,.45);background:var(--mint-dim);color:var(--mint);}
+  .app-modal-actions .danger{border-color:rgba(255,107,107,.45);background:var(--coral-dim);color:var(--coral);}
 
   body{
     min-height:100vh;
@@ -371,6 +396,10 @@
   .entry{border-color:#24323D; background:rgba(14,20,27,.82); transition:transform .18s ease, border-color .18s ease, background .18s ease;}
   .entry:hover{transform:translateX(2px); border-color:#38505A; background:#111B24;}
   .entry-meta{color:#91A19F;}
+  .search-input input{border-color:#2A3A45; background:#111B24;}
+  .search-input input::placeholder{color:#687B7F;}
+  .search-input input:focus{outline:2px solid var(--mint); outline-offset:2px;}
+  .date-preset:hover,.undo-btn:hover{border-color:var(--mint); color:var(--mint);}
   .edit-btn,.del-btn{min-width:28px; min-height:28px; border-radius:7px;}
   .edit-btn:hover{background:var(--mint-dim);}
   .del-btn:hover{background:var(--coral-dim);}
@@ -378,25 +407,28 @@
     .wrap{padding:18px 14px 36px;}
     .dash,.card{padding:16px;}
     .net-value{font-size:30px;}
+    .list-head{align-items:flex-start; gap:8px; flex-direction:column;}
+    .filter-tabs{align-self:stretch; justify-content:space-between;}
+    .filter-tab{flex:1;}
   }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;">รายรับรายจ่ายร้านขายอาหาร คำนวณอัตโนมัติ พร้อมเป้าหมายยอดขาย</h1>
+  <h1 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;">รายรับรายจ่ายร้านขายอาหาร คำนวณอัตโนมัติ พร้อมเป้าหมายเงินคงเหลือ</h1>
 
   <div class="topbar">
     <div class="topbar-text">
       <h2>บันทึกรายรับ-รายจ่าย</h2>
       <p class="sub">Food stall ledger</p>
     </div>
-    <button class="icon-btn" id="settingsBtn" aria-label="ตั้งค่าเป้าหมายยอดขาย">
+    <button class="icon-btn" id="settingsBtn" aria-label="ตั้งค่าเป้าหมายเงินคงเหลือ">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
     </button>
   </div>
 
   <div class="settings-panel" id="settingsPanel">
-    <p class="st-title">เป้าหมายยอดขาย (บาท)</p>
+    <p class="st-title">เป้าหมายเงินคงเหลือสุทธิ (บาท)</p>
     <div class="settings-row">
       <input type="number" id="targetInput" placeholder="เช่น 10000" inputmode="decimal" min="0" step="1">
       <button id="saveTargetBtn">บันทึก</button>
@@ -408,19 +440,15 @@
     <p class="net-value mono" id="netValue">0 บาท</p>
     <div class="pill-row">
       <div class="pill">
-        <p class="pill-label">ยอดขาย</p>
+        <p class="pill-label">ยอดขายจากการขาย</p>
         <p class="pill-value income mono" id="totalSales">0</p>
       </div>
       <div class="pill">
         <p class="pill-label">รายจ่ายรวม</p>
         <p class="pill-value expense mono" id="totalExpense">0</p>
       </div>
-      <div class="pill">
-        <p class="pill-label">เงินกู้ยืม</p>
-        <p class="pill-value mono" id="totalLoan">0</p>
-      </div>
     </div>
-    <p class="sales-target mono" id="salesProfit">ผลต่างยอดขาย - รายจ่าย 0 บาท</p>
+    <p class="sales-target mono" id="salesProfit">เงินคงเหลือสุทธิ (รวมเงินกู้) 0 บาท</p>
     <div class="sales-block" id="salesBlock"></div>
   </div>
 
@@ -453,7 +481,7 @@
     <button class="cancel-btn" id="cancelEditBtn" type="button">ยกเลิกการแก้ไข</button>
   </div>
 
-  <div class="card">
+  <div class="card settings-backup" id="backupCard">
     <p class="card-title">สำรองข้อมูล</p>
     <div class="type-toggle">
       <button type="button" class="type-btn" id="exportBtn">ดาวน์โหลด JSON</button>
@@ -496,6 +524,22 @@
     </div>
   </div>
 
+  <div class="list-tools">
+    <label class="search-input">
+      <span class="sr-only">ค้นหารายการ</span>
+      <input type="search" id="searchInput" placeholder="ค้นหารายการหรือหมวดหมู่" autocomplete="off">
+    </label>
+  </div>
+  <div class="date-presets" aria-label="ตัวกรองช่วงเวลา">
+    <button class="date-preset active" data-range="all" type="button">ทั้งหมด</button>
+    <button class="date-preset" data-range="today" type="button">วันนี้</button>
+    <button class="date-preset" data-range="week" type="button">7 วัน</button>
+    <button class="date-preset" data-range="month" type="button">เดือนนี้</button>
+  </div>
+  <div class="undo-bar" id="undoBar" role="status">
+    <span id="undoMessage"></span>
+    <button class="undo-btn" id="undoBtn" type="button">เลิกทำ</button>
+  </div>
   <div class="list-head">
     <p class="list-title">รายการทั้งหมด</p>
     <div class="filter-tabs">
@@ -507,11 +551,27 @@
   <div id="entryList"></div>
 </div>
 
+<div class="app-modal" id="appModal" role="dialog" aria-modal="true" aria-labelledby="appModalTitle" aria-describedby="appModalMessage">
+  <div class="app-modal-card">
+    <h2 class="app-modal-title" id="appModalTitle"></h2>
+    <p class="app-modal-message" id="appModalMessage"></p>
+    <div class="app-modal-actions">
+      <button type="button" id="appModalCancel">ยกเลิก</button>
+      <button type="button" id="appModalConfirm" class="primary">ตกลง</button>
+    </div>
+  </div>
+</div>
+
 <script>
 let entries = [];
 let currentType = 'income';
 let currentFilter = 'all';
+let currentSearch = '';
+let currentRange = 'all';
 let salesTarget = 5000;
+let undoState = [];
+let undoTimer = null;
+let modalResolver = null;
 const STORAGE_KEY = 'food-tracker.entries.v1';
 const TARGET_KEY = 'food-tracker.salesTarget.v1';
 const SALES_CATEGORY = 'รายได้จากการขาย';
@@ -1206,6 +1266,48 @@ function setFilter(filter){
   renderList();
 }
 
+function localISODate(date = new Date()){
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function getRangeStart(range){
+  if(range === 'all') return '';
+  const date = new Date();
+  if(range === 'week') date.setDate(date.getDate() - 6);
+  if(range === 'month') date.setDate(1);
+  return localISODate(date);
+}
+
+function setDateRange(range){
+  currentRange = range;
+  document.querySelectorAll('.date-preset').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-range') === range);
+  });
+  render();
+}
+
+function dateFilteredEntries(){
+  const start = getRangeStart(currentRange);
+  const today = localISODate();
+  return entries.filter(e => {
+    const date = dateValueForEntry(e);
+    if(currentRange === 'today') return date === today;
+    return !start || date >= start;
+  });
+}
+
+function visibleEntries(){
+  const query = currentSearch.trim().toLocaleLowerCase('th-TH');
+  return dateFilteredEntries().filter(e => {
+    const matchesType = currentFilter === 'all' || e.type === currentFilter;
+    const matchesSearch = !query || `${e.item} ${e.category} ${e.date}`.toLocaleLowerCase('th-TH').includes(query);
+    return matchesType && matchesSearch;
+  });
+}
+
 function renderRing(pct){
   const clamped = Math.max(0, Math.min(100, pct));
   const r = 32, c = 2 * Math.PI * r;
@@ -1221,37 +1323,37 @@ function renderRing(pct){
 
 function renderSalesBlock(){
   const block = document.getElementById('salesBlock');
-  const sales = entries
-    .filter(e => e.type === 'income' && e.category === SALES_CATEGORY)
-    .reduce((sum, e) => sum + Number(e.amount), 0);
+  const netBalance = entries.reduce((sum, e) => {
+    return sum + (e.type === 'income' ? Number(e.amount) : -Number(e.amount));
+  }, 0);
 
   if(salesTarget === null || salesTarget <= 0){
     block.innerHTML = `
       <div class="sales-empty">
-        ยังไม่ได้ตั้งเป้าหมายยอดขาย<br>
+        ยังไม่ได้ตั้งเป้าหมายเงินคงเหลือ<br>
         <button id="setTargetPrompt">ตั้งเป้าหมายตอนนี้</button>
       </div>`;
     document.getElementById('setTargetPrompt').addEventListener('click', openSettings);
     return;
   }
 
-  const pct = (sales / salesTarget) * 100;
-  const overTarget = sales - salesTarget;
+  const pct = (netBalance / salesTarget) * 100;
+  const overTarget = netBalance - salesTarget;
   block.innerHTML = `
     <div class="ring-wrap">
       ${renderRing(pct)}
       <div class="ring-pct mono">${Math.round(pct)}%</div>
     </div>
     <div class="sales-info">
-      <p class="sales-label">ยอดขาย</p>
-      <p class="sales-value mono">${formatBaht(sales)}</p>
+      <p class="sales-label">เงินคงเหลือสุทธิ</p>
+      <p class="sales-value mono">${formatBaht(netBalance)}</p>
       <p class="sales-target mono">เป้าหมาย ${formatBaht(salesTarget)} บาท${overTarget > 0 ? ` · เกิน ${formatBaht(overTarget)} บาท` : ''}</p>
     </div>`;
 }
 
 function renderList(){
   const list = document.getElementById('entryList');
-  const filtered = currentFilter === 'all' ? entries : entries.filter(e => e.type === currentFilter);
+  const filtered = visibleEntries();
   list.innerHTML = '';
   if(filtered.length === 0){
     list.innerHTML = '<div class="empty">ไม่มีรายการในหมวดนี้</div>';
@@ -1297,9 +1399,8 @@ function render(){
   });
   document.getElementById('totalSales').textContent = formatBaht(sales);
   document.getElementById('totalExpense').textContent = formatBaht(expense);
-  document.getElementById('totalLoan').textContent = formatBaht(loan);
   document.getElementById('netValue').textContent = formatBaht(income - expense) + ' บาท';
-  document.getElementById('salesProfit').textContent = 'ผลต่างยอดขาย - รายจ่าย ' + formatBaht(sales - expense) + ' บาท';
+  document.getElementById('salesProfit').textContent = 'เงินคงเหลือสุทธิ (รวมเงินกู้) ' + formatBaht(income - expense) + ' บาท';
   renderSalesBlock();
   renderList();
   updatePeriodSummary();
@@ -1437,7 +1538,7 @@ function resetForm(){
 function updatePeriodSummary(){
   const from = document.getElementById('summaryFrom').value;
   const to = document.getElementById('summaryTo').value;
-  let list = entries;
+  let list = entries.slice();
   if(from) list = list.filter(e => dateValueForEntry(e) >= from);
   if(to) list = list.filter(e => dateValueForEntry(e) <= to);
   const sales = list.filter(e => e.type === 'income' && e.category === SALES_CATEGORY).reduce((s,e)=>s+Number(e.amount),0);
@@ -1446,6 +1547,39 @@ function updatePeriodSummary(){
   document.getElementById('periodSales').textContent = formatBaht(sales);
   document.getElementById('periodExpense').textContent = formatBaht(expense);
   document.getElementById('periodLoan').textContent = formatBaht(loan);
+}
+
+function closeAppModal(result){
+  const modal = document.getElementById('appModal');
+  modal.classList.remove('open');
+  if(modalResolver){
+    const resolve = modalResolver;
+    modalResolver = null;
+    resolve(result);
+  }
+}
+
+function openAppModal({title, message, confirmText = 'ตกลง', cancelText = 'ยกเลิก', danger = false, confirmOnly = false}){
+  const modal = document.getElementById('appModal');
+  const confirmButton = document.getElementById('appModalConfirm');
+  const cancelButton = document.getElementById('appModalCancel');
+  document.getElementById('appModalTitle').textContent = title;
+  document.getElementById('appModalMessage').textContent = message;
+  confirmButton.textContent = confirmText;
+  confirmButton.className = danger ? 'danger' : 'primary';
+  cancelButton.textContent = cancelText;
+  cancelButton.style.display = confirmOnly ? 'none' : '';
+  modal.classList.add('open');
+  confirmButton.focus();
+  return new Promise(resolve => { modalResolver = resolve; });
+}
+
+function appAlert(message, title = 'แจ้งเตือน'){
+  return openAppModal({title, message, confirmOnly:true});
+}
+
+function appConfirm(message, title = 'ยืนยันการทำรายการ', danger = false){
+  return openAppModal({title, message, confirmText:'ยืนยัน', danger});
 }
 
 function buildBackupData(){ return {version:2, appSchema:APP_SCHEMA_VERSION, exportedAt:new Date().toISOString(), entries, salesTarget}; }
@@ -1490,7 +1624,7 @@ function exportCSV(){
 
 function importData(file){
   const reader = new FileReader();
-  reader.onload = () => {
+  reader.onload = async () => {
     try{
       const data = JSON.parse(reader.result);
       const importedEntries = Array.isArray(data) ? data : data.entries;
@@ -1499,7 +1633,8 @@ function importData(file){
       if(inspected.entries.length === 0) throw new Error('ไม่พบรายการที่ถูกต้องในไฟล์');
       const rejectedMessage = inspected.rejected > 0
         ? `\n\nมีรายการที่ไม่ผ่านการตรวจสอบ ${inspected.rejected} รายการ (เช่น จำนวนเงินเป็น 0 หรือข้อมูลไม่ครบ) และจะไม่ถูกนำเข้า` : '';
-      if(!confirm(`การนำเข้าจะเขียนทับรายการเดิมทั้งหมด มีรายการใหม่ ${inspected.entries.length} รายการ${rejectedMessage}\n\nต้องการดำเนินการต่อหรือไม่?`)) return;
+      const confirmed = await appConfirm(`การนำเข้าจะเขียนทับรายการเดิมทั้งหมด มีรายการใหม่ ${inspected.entries.length} รายการ${rejectedMessage}\n\nต้องการดำเนินการต่อหรือไม่?`);
+      if(!confirmed) return;
       entries = inspected.entries;
       if(data && !Array.isArray(data) && Number.isFinite(Number(data.salesTarget)) && Number(data.salesTarget) > 0){
         salesTarget = Number(data.salesTarget);
@@ -1507,9 +1642,9 @@ function importData(file){
       }
       saveEntries();
       render();
-      alert('นำเข้าข้อมูลสำเร็จ');
+      await appAlert('นำเข้าข้อมูลสำเร็จ');
     }catch(err){
-      alert('นำเข้าข้อมูลไม่สำเร็จ: ' + err.message);
+      await appAlert('นำเข้าข้อมูลไม่สำเร็จ: ' + err.message, 'นำเข้าข้อมูลไม่สำเร็จ');
     }
   };
   reader.readAsText(file);
@@ -1564,19 +1699,53 @@ function addEntry(){
   itemInput.focus();
 }
 
-function deleteEntry(id){
+async function deleteEntry(id){
   const e = entries.find(x => x.id === String(id));
   if(!e) return;
-  if(!confirm(`ต้องการลบรายการ "${e.item}" จำนวน ${formatBaht(e.amount)} บาทหรือไม่?`)) return;
+  const confirmed = await appConfirm(`ต้องการลบรายการ "${e.item}" จำนวน ${formatBaht(e.amount)} บาทหรือไม่?`, 'ลบรายการ', true);
+  if(!confirmed) return;
+  undoState.push({entry: {...e}, index: entries.indexOf(e)});
   entries = entries.filter(x => x.id !== String(id));
   saveEntries();
   render();
+  showUndo(`ลบ “${e.item}” แล้ว`);
+}
+
+function showUndo(message){
+  clearTimeout(undoTimer);
+  const count = undoState.length;
+  document.getElementById('undoMessage').textContent = count > 1 ? `${message} · ย้อนกลับได้อีก ${count} รายการ` : message;
+  document.getElementById('undoBar').classList.add('visible');
+  undoTimer = setTimeout(() => {
+    undoState = [];
+    document.getElementById('undoBar').classList.remove('visible');
+  }, 8000);
+}
+
+function undoDelete(){
+  const state = undoState.pop();
+  if(!state) return;
+  entries.splice(Math.min(state.index, entries.length), 0, state.entry);
+  saveEntries();
+  render();
+  clearTimeout(undoTimer);
+  if(undoState.length){
+    showUndo(`กู้คืน “${state.entry.item}” แล้ว`);
+  }else{
+    document.getElementById('undoBar').classList.remove('visible');
+  }
 }
 
 document.getElementById('btnIncome').addEventListener('click', () => setType('income'));
 document.getElementById('btnExpense').addEventListener('click', () => setType('expense'));
 document.getElementById('addBtn').addEventListener('click', addEntry);
 document.getElementById('cancelEditBtn').addEventListener('click', resetForm);
+document.getElementById('undoBtn').addEventListener('click', undoDelete);
+document.getElementById('appModalCancel').addEventListener('click', () => closeAppModal(false));
+document.getElementById('appModalConfirm').addEventListener('click', () => closeAppModal(true));
+document.getElementById('appModal').addEventListener('click', event => {
+  if(event.target.id === 'appModal') closeAppModal(false);
+});
 document.getElementById('settingsBtn').addEventListener('click', toggleSettings);
 document.getElementById('saveTargetBtn').addEventListener('click', () => {
   const val = parseFloat(document.getElementById('targetInput').value);
@@ -1587,6 +1756,13 @@ document.getElementById('saveTargetBtn').addEventListener('click', () => {
 });
 document.querySelectorAll('.filter-tab').forEach(btn => {
   btn.addEventListener('click', () => setFilter(btn.getAttribute('data-filter')));
+});
+document.querySelectorAll('.date-preset').forEach(btn => {
+  btn.addEventListener('click', () => setDateRange(btn.getAttribute('data-range')));
+});
+document.getElementById('searchInput').addEventListener('input', event => {
+  currentSearch = event.target.value;
+  renderList();
 });
 document.getElementById('itemInput').addEventListener('input', () => {
   document.getElementById('errorMsg').style.display = 'none';
@@ -1612,11 +1788,18 @@ window.addEventListener('storage', event => {
   if(event.key === TARGET_KEY){ loadTarget(); renderSalesBlock(); }
 });
 
+document.getElementById('settingsPanel').appendChild(document.getElementById('backupCard'));
 setType('income');
 loadEntries();
 loadTarget();
 setDefaultDate();
 render();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(err => {
+    console.warn('Service worker unavailable:', err);
+  }));
+}
 </script>
 </body>
 </html>
