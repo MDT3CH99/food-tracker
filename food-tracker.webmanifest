@@ -1,37 +1,10 @@
 {
-  "name": "รายรับรายจ่าย ร้านขายอาหาร",
-  "short_name": "บัญชีร้านอาหาร",
-  "description": "แอปบันทึกรายรับรายจ่ายสำหรับร้านขายอาหาร",
-  "lang": "th",
-  "start_url": "./food_tracker_v5_safe.html",
-  "scope": "./",
+  "name": "Food Tracker",
+  "short_name": "FoodTracker",
+  "start_url": "/food-tracker/food_tracker_v5_safe.html",
+  "scope": "/food-tracker/",
   "display": "standalone",
-  "background_color": "#0B1118",
-  "theme_color": "#0B1118",
-  "icons": [
-    {
-      "src": "food-tracker-icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "food-tracker-icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "food-tracker-icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "food-tracker-icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    }
-  ]
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": []
 }
