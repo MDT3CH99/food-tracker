@@ -1,0 +1,19 @@
+{
+  "name": "รายรับรายจ่าย ร้านขายอาหาร",
+  "short_name": "บัญชีร้านอาหาร",
+  "description": "แอปบันทึกรายรับรายจ่ายสำหรับร้านขายอาหาร",
+  "lang": "th",
+  "start_url": "./food_tracker_v5_safe.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0B1118",
+  "theme_color": "#0B1118",
+  "icons": [
+    {
+      "src": "food-tracker-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
